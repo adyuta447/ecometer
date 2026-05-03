@@ -65,7 +65,7 @@ export default function RegisterPage() {
       <div className="w-full max-w-md bg-surface-card border border-surface-hairline rounded-[32px] p-8 shadow-xl">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-serif italic text-brand-primary mb-2">Join EcoMeter.</h1>
-          <p className="text-sm text-text-muted">Create your organization's workspace.</p>
+          <p className="text-sm text-text-muted">Create your organization&apos;s workspace.</p>
         </div>
 
         {error && <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-500 rounded-xl text-sm mb-6">{error}</div>}

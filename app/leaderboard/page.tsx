@@ -24,7 +24,7 @@ export default function LeaderboardPage() {
              <div className="relative z-10 w-full max-w-lg">
                <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-bold uppercase tracking-widest mb-4">
                  <Sparkles className="w-3 h-3 text-brand-accent-amber" />
-                 This Month's Champion
+                 This Month&apos;s Champion
                </div>
                <h2 className="text-4xl font-serif font-bold italic mb-2">Frontend Team</h2>
                <p className="text-brand-accent-amber font-medium">Tim Front-End bulan ini berhasil menghemat energi 10% lebih banyak dari Tim Desain!</p>

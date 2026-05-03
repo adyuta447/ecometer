@@ -1,33 +1,78 @@
 "use client";
 
-import { useState } from "react";
-import { Plus, Router, WifiHigh, WifiOff, Activity, AlertCircle, X, Check } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Plus, Router, WifiHigh, WifiOff, Activity, AlertCircle, X, Check, Trash2, Loader2 } from "lucide-react";
+import { collection, query, where, getDocs, addDoc, doc, deleteDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { useAuth } from "@/components/AuthProvider";
 
 export default function DevicesPage() {
+  const { user } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [devices, setDevices] = useState([
-    { id: 1, mac: "00:1A:2B:3C:A4:F2", name: "Panel T-1 Server", status: "online", mape: "2.1%", lastPing: "1m ago" },
-    { id: 2, mac: "00:1A:2B:3C:B8:11", name: "HVAC Zone A", status: "online", mape: "1.8%", lastPing: "2m ago" },
-    { id: 3, mac: "00:1A:2B:3C:C7:99", name: "Lighting Hub 3", status: "offline", mape: "Error", lastPing: "4hrs ago" }
-  ]);
+  const [devices, setDevices] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const [newDevice, setNewDevice] = useState({ mac: "", name: "" });
+  const [saving, setSaving] = useState(false);
 
-  const handleRegister = (e: React.FormEvent) => {
+  useEffect(() => {
+    async function fetchDevices() {
+      if (!user) return;
+      try {
+        const q = query(collection(db, "devices"), where("userId", "==", user.uid));
+        const qs = await getDocs(q);
+        setDevices(qs.docs.map(d => ({ id: d.id, ...d.data() })));
+      } catch (error) {
+        console.error("Error fetching devices:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchDevices();
+  }, [user]);
+
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    if(newDevice.mac && newDevice.name) {
-      setDevices([...devices, { 
-        id: Date.now(), 
-        mac: newDevice.mac, 
-        name: newDevice.name, 
-        status: "online", 
-        mape: "calculating...", 
-        lastPing: "Just now" 
-      }]);
-      setIsModalOpen(false);
-      setNewDevice({ mac: "", name: "" });
+    if(newDevice.mac && newDevice.name && user) {
+      setSaving(true);
+      try {
+        const docRef = await addDoc(collection(db, "devices"), {
+          name: newDevice.name,
+          mac: newDevice.mac,
+          status: "online",
+          mape: "calculating...",
+          userId: user.uid,
+          createdAt: new Date().toISOString()
+        });
+        setDevices([...devices, { 
+          id: docRef.id, 
+          mac: newDevice.mac, 
+          name: newDevice.name, 
+          status: "online", 
+          mape: "calculating..." 
+        }]);
+        setIsModalOpen(false);
+        setNewDevice({ mac: "", name: "" });
+      } catch (error) {
+         console.error("Failed to add device", error);
+      } finally {
+        setSaving(false);
+      }
     }
   };
+
+  const handleDelete = async (id: string) => {
+     if(confirm("Are you sure you want to delete this device?")) {
+        try {
+           await deleteDoc(doc(db, "devices", id));
+           setDevices(devices.filter(d => d.id !== id));
+        } catch (error) {
+           console.error("Failed to delete device", error);
+        }
+     }
+  }
+
+  if (loading) return <div className="p-8 max-w-6xl mx-auto flex justify-center"><Loader2 className="w-6 h-6 animate-spin text-brand-primary" /></div>;
 
   return (
     <div className="p-8 max-w-6xl mx-auto space-y-8 relative">
@@ -51,7 +96,7 @@ export default function DevicesPage() {
               <span className="text-[10px] uppercase font-bold text-text-muted-soft tracking-widest">Active Sensors</span>
               <Activity className="w-4 h-4 text-brand-accent-teal" />
             </div>
-            <div className="text-2xl font-serif font-bold text-text-ink">{devices.filter(d => d.status === 'online').length}</div>
+            <div className="text-2xl font-serif font-bold text-text-ink">{devices.filter(d => d.status === 'online' || d.status === 'Active').length}</div>
          </div>
          <div className="bg-surface-card rounded-[24px] p-5 border border-surface-hairline border-brand-primary/30">
             <div className="flex justify-between items-center mb-2">
@@ -78,19 +123,24 @@ export default function DevicesPage() {
               <th className="px-6 py-4 font-bold border-b border-surface-hairline">MAC Address</th>
               <th className="px-6 py-4 font-bold border-b border-surface-hairline">Status</th>
               <th className="px-6 py-4 font-bold border-b border-surface-hairline">MAPE</th>
-              <th className="px-6 py-4 font-bold border-b border-surface-hairline">Last Ping</th>
+              <th className="px-6 py-4 font-bold border-b border-surface-hairline text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="text-text-body">
+            {devices.length === 0 && (
+              <tr>
+                <td colSpan={5} className="px-6 py-8 text-center text-text-muted">No devices registered.</td>
+              </tr>
+            )}
             {devices.map(device => (
               <tr key={device.id} className="hover:bg-surface-soft/50 transition-colors border-b border-surface-hairline last:border-0 border-dashed">
                 <td className="px-6 py-4 font-medium flex items-center gap-3">
-                   <Router className={`w-4 h-4 ${device.status === 'online' ? 'text-text-muted' : 'text-brand-primary'}`} />
+                   <Router className={`w-4 h-4 ${device.status === 'online' || device.status === 'Active' ? 'text-text-muted' : 'text-brand-primary'}`} />
                    {device.name}
                 </td>
                 <td className="px-6 py-4 font-mono text-xs">{device.mac}</td>
                 <td className="px-6 py-4">
-                  {device.status === 'online' ? (
+                  {device.status === 'online' || device.status === 'Active' ? (
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-brand-accent-teal/10 text-brand-accent-teal text-[10px] font-bold uppercase tracking-widest rounded-md">
                       <WifiHigh className="w-3 h-3" /> Online
                     </span>
@@ -101,7 +151,11 @@ export default function DevicesPage() {
                   )}
                 </td>
                 <td className="px-6 py-4">{device.mape}</td>
-                <td className="px-6 py-4 text-xs text-text-muted">{device.lastPing}</td>
+                <td className="px-6 py-4 text-right">
+                  <button onClick={() => handleDelete(device.id)} className="text-text-muted hover:text-red-500 transition-colors">
+                     <Trash2 className="w-4 h-4 ml-auto" />
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -144,9 +198,11 @@ export default function DevicesPage() {
               </div>
               <button 
                 type="submit"
+                disabled={saving}
                 className="w-full bg-brand-primary text-text-on-dark px-4 py-3 rounded-xl text-sm font-bold tracking-wide hover:bg-brand-primary-active transition-colors mt-6 flex justify-center items-center gap-2"
               >
-                <Check className="w-4 h-4" /> Save Registration
+                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />} 
+                {saving ? "Saving..." : "Save Registration"}
               </button>
             </form>
           </div>

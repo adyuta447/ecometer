@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { AuthProvider } from "@/components/AuthProvider";
+import { DataSeeder } from "@/components/DataSeeder";
 
 export function RootLayoutClient({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -10,6 +11,7 @@ export function RootLayoutClient({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthProvider>
+      <DataSeeder />
       {isAuthPage ? (
         children
       ) : (

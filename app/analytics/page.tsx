@@ -1,8 +1,11 @@
 "use client";
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
-import { TrendingDown, Wrench, Sparkles, Activity } from 'lucide-react';
+import { TrendingDown, Wrench, Sparkles, Activity, Loader2 } from 'lucide-react';
+import { useAuth } from '@/components/AuthProvider';
+import { collection, query, where, getDocs } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 const baseData = [
   { day: 'Mon', actual: 14200, predicted: 14200 },
@@ -15,7 +18,29 @@ const baseData = [
 ];
 
 export default function AnalyticsPage() {
+  const { user } = useAuth();
   const [efficiencyCut, setEfficiencyCut] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [tariff, setTariff] = useState(1444.70);
+  
+  useEffect(() => {
+    async function fetchData() {
+      if (!user) return;
+      try {
+        const settingsQ = query(collection(db, "settings"), where("userId", "==", user.uid));
+        const settingsSnap = await getDocs(settingsQ);
+        if (!settingsSnap.empty) {
+          const s = settingsSnap.docs[0].data();
+          if (s.tariff) setTariff(Number(s.tariff));
+        }
+      } catch (error) {
+        console.error("Failed to load analytics data:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, [user]);
 
   const chartData = useMemo(() => {
     return baseData.map(d => {
@@ -32,7 +57,10 @@ export default function AnalyticsPage() {
     });
   }, [efficiencyCut]);
 
-  const currentProjection = efficiencyCut > 0 ? 15000 * (1 - (efficiencyCut / 100) * 0.2) : 15000;
+  const baseLineTotalKWh = 15000;
+  const currentTotalKWh = efficiencyCut > 0 ? baseLineTotalKWh * (1 - (efficiencyCut / 100) * 0.2) : baseLineTotalKWh;
+
+  if (loading) return <div className="p-8 max-w-6xl mx-auto flex justify-center"><Loader2 className="w-6 h-6 animate-spin text-brand-primary" /></div>;
 
   return (
     <div className="p-8 max-w-6xl mx-auto space-y-6">
@@ -58,14 +86,14 @@ export default function AnalyticsPage() {
             <div>
               <p className="text-xs font-bold uppercase tracking-widest text-text-muted-soft mb-1">Projected Billing</p>
               <div className="flex items-baseline gap-2 transition-all duration-300">
-                <span className="text-3xl font-serif font-bold text-text-ink">Rp {(currentProjection).toLocaleString('id-ID')}</span>
+                <span className="text-3xl font-serif font-bold text-text-ink">Rp {(currentTotalKWh * tariff).toLocaleString('id-ID', { maximumFractionDigits: 0 })}</span>
               </div>
             </div>
             {efficiencyCut > 0 && (
               <div>
                 <p className="text-xs font-bold uppercase tracking-widest text-text-muted-soft mb-1">Baseline</p>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-xl font-serif text-brand-primary line-through opacity-70">Rp 15.000.000</span>
+                  <span className="text-xl font-serif text-brand-primary line-through opacity-70">Rp {(baseLineTotalKWh * tariff).toLocaleString('id-ID', { maximumFractionDigits: 0 })}</span>
                 </div>
               </div>
             )}
@@ -80,6 +108,7 @@ export default function AnalyticsPage() {
                 <Tooltip 
                   contentStyle={{ backgroundColor: 'var(--color-surface-dark)', borderRadius: '12px', border: 'none', color: 'var(--color-text-on-dark)' }}
                   itemStyle={{ color: 'var(--color-text-on-dark)' }}
+                  formatter={(value: any) => [`${Number(value).toFixed(0)} kWh`, "Consumption"]}
                 />
                 <Line type="monotone" dataKey="actual" stroke="var(--color-text-ink)" strokeWidth={2} dot={{ r: 4, fill: 'var(--color-surface-canvas)', strokeWidth: 2 }} activeDot={{ r: 6 }} isAnimationActive={false} />
                 <Line type="monotone" dataKey="predicted" stroke="var(--color-brand-primary)" strokeWidth={2} strokeDasharray="5 5" dot={false} isAnimationActive={true} animationDuration={500} />
@@ -96,7 +125,7 @@ export default function AnalyticsPage() {
             </div>
             <h3 className="text-xl font-serif font-bold italic mb-2">What-If Simulation</h3>
             <p className="text-sm opacity-90 mb-6 leading-relaxed">
-              Slide to simulate cutting HVAC active hours. Predict real-time impact on the projected billing via AI.
+              Slide to simulate cutting active hours. Predict real-time impact on the projected billing via AI.
             </p>
             
             <div className="mt-auto mb-6">
@@ -117,7 +146,7 @@ export default function AnalyticsPage() {
             
             <button 
               className="flex items-center justify-between w-full p-3 bg-surface-dark text-text-on-dark rounded-xl text-sm font-medium hover:bg-surface-dark-elevated transition-colors"
-              onClick={() => alert(`Applied ${efficiencyCut}% reduction to HVAC Schedule.`)}
+              onClick={() => alert(`Applied ${efficiencyCut}% reduction to active systems.`)}
             >
               <span>Execute Override</span>
               <Wrench className="w-4 h-4 text-brand-accent-teal" />

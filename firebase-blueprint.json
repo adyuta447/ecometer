@@ -11,12 +11,64 @@
         "createdAt": { "type": "string" }
       },
       "required": ["name", "email", "role"]
+    },
+    "Device": {
+      "title": "Device",
+      "description": "IoT Device Registration",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "mac": { "type": "string" },
+        "status": { "type": "string" },
+        "mape": { "type": "string" },
+        "userId": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["name", "mac", "status", "userId"]
+    },
+    "VirtualGroup": {
+      "title": "Virtual Group",
+      "description": "Logical grouping of devices",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "usage": { "type": "string" },
+        "capacityPercentage": { "type": "string" },
+        "co2": { "type": "string" },
+        "userId": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["name", "userId"]
+    },
+    "Settings": {
+      "title": "Settings",
+      "description": "Billing and system settings",
+      "type": "object",
+      "properties": {
+        "tariff": { "type": "string" },
+        "budget": { "type": "string" },
+        "co2Factor": { "type": "string" },
+        "userId": { "type": "string" }
+      },
+      "required": ["tariff", "userId"]
     }
   },
   "firestore": {
     "/users/{userId}": {
       "schema": "User",
       "description": "User profiles stored by uid"
+    },
+    "/devices/{deviceId}": {
+      "schema": "Device",
+      "description": "Registered IoT Devices"
+    },
+    "/groups/{groupId}": {
+      "schema": "VirtualGroup",
+      "description": "Groups for telemetry aggregation"
+    },
+    "/settings/{settingId}": {
+      "schema": "Settings",
+      "description": "System settings per user"
     }
   }
 }

@@ -1,11 +1,36 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Download, FileText, CheckCircle2, Loader2, Factory, FileSpreadsheet } from "lucide-react";
+import { useAuth } from "@/components/AuthProvider";
+import { collection, query, where, getDocs } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 export default function ReportsPage() {
+  const { user } = useAuth();
   const [isExporting, setIsExporting] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
+  const [co2Factor, setCo2Factor] = useState(0.87);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchSettings() {
+      if (!user) return;
+      try {
+        const q = query(collection(db, "settings"), where("userId", "==", user.uid));
+        const qs = await getDocs(q);
+        if (!qs.empty) {
+          const s = qs.docs[0].data();
+          if (s.co2Factor) setCo2Factor(Number(s.co2Factor));
+        }
+      } catch (error) {
+        console.error("Error fetching settings:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchSettings();
+  }, [user]);
 
   const handleExport = () => {
     setIsExporting(true);
@@ -15,6 +40,12 @@ export default function ReportsPage() {
       setTimeout(() => setToastMessage(""), 5000); // clear toast after 5s
     }, 2000);
   };
+
+  const calculateEmissions = (kwh: number) => {
+     return ((kwh * co2Factor) / 1000).toFixed(1);
+  };
+
+  if (loading) return <div className="p-8 max-w-6xl mx-auto flex justify-center"><Loader2 className="w-6 h-6 animate-spin text-brand-primary" /></div>;
 
   return (
     <div className="p-8 max-w-6xl mx-auto space-y-8 relative pb-20">
@@ -37,13 +68,13 @@ export default function ReportsPage() {
          <div className="bg-surface-card rounded-[24px] p-6 border border-surface-hairline flex flex-col justify-between min-h-[140px]">
            <div>
              <p className="text-[10px] uppercase font-bold text-text-muted-soft mb-2 tracking-widest">Total Energy Usage</p>
-             <h3 className="text-3xl font-serif font-bold text-text-ink">145.2 MWh</h3>
+             <h3 className="text-3xl font-serif font-bold text-text-ink">104.3 MWh</h3>
            </div>
          </div>
          <div className="bg-surface-card rounded-[24px] p-6 border border-surface-hairline flex flex-col justify-between min-h-[140px]">
            <div>
              <p className="text-[10px] uppercase font-bold text-text-muted-soft mb-2 tracking-widest">Calculated Emissions</p>
-             <h3 className="text-3xl font-serif font-bold text-text-ink">128.4 mt</h3>
+             <h3 className="text-3xl font-serif font-bold text-text-ink">{calculateEmissions(104300)} mt</h3>
            </div>
          </div>
          <div className="bg-surface-dark rounded-[24px] p-6 text-text-on-dark flex flex-col justify-between min-h-[140px] shadow-lg">
@@ -75,25 +106,25 @@ export default function ReportsPage() {
             </thead>
             <tbody className="text-text-body font-medium">
               <tr className="hover:bg-surface-soft/50 transition-colors">
-                <td className="px-6 py-4 border-b border-surface-hairline border-dashed">Jan 2026</td>
+                <td className="px-6 py-4 border-b border-surface-hairline border-dashed">Jan {new Date().getFullYear()}</td>
                 <td className="px-6 py-4 border-b border-surface-hairline border-dashed">HVAC Systems</td>
                 <td className="px-6 py-4 border-b border-surface-hairline border-dashed">45,200</td>
-                <td className="px-6 py-4 border-b border-surface-hairline border-dashed">0.87 kgCO2e/kWh</td>
-                <td className="px-6 py-4 border-b border-surface-hairline border-dashed text-right font-serif text-base">39.3</td>
+                <td className="px-6 py-4 border-b border-surface-hairline border-dashed">{co2Factor} kgCO2e/kWh</td>
+                <td className="px-6 py-4 border-b border-surface-hairline border-dashed text-right font-serif text-base">{calculateEmissions(45200)}</td>
               </tr>
               <tr className="hover:bg-surface-soft/50 transition-colors">
-                <td className="px-6 py-4 border-b border-surface-hairline border-dashed">Feb 2026</td>
+                <td className="px-6 py-4 border-b border-surface-hairline border-dashed">Feb {new Date().getFullYear()}</td>
                 <td className="px-6 py-4 border-b border-surface-hairline border-dashed">HVAC Systems</td>
                 <td className="px-6 py-4 border-b border-surface-hairline border-dashed">38,100 <span className="text-[10px] text-brand-accent-teal ml-2">↓ 15%</span></td>
-                <td className="px-6 py-4 border-b border-surface-hairline border-dashed">0.87 kgCO2e/kWh</td>
-                <td className="px-6 py-4 border-b border-surface-hairline border-dashed text-right font-serif text-base text-brand-accent-teal">33.1</td>
+                <td className="px-6 py-4 border-b border-surface-hairline border-dashed">{co2Factor} kgCO2e/kWh</td>
+                <td className="px-6 py-4 border-b border-surface-hairline border-dashed text-right font-serif text-base text-brand-accent-teal">{calculateEmissions(38100)}</td>
               </tr>
               <tr className="hover:bg-surface-soft/50 transition-colors bg-brand-primary/5">
-                <td className="px-6 py-4 border-b border-surface-hairline">Mar 2026 (MTD)</td>
+                <td className="px-6 py-4 border-b border-surface-hairline">Mar {new Date().getFullYear()} (MTD)</td>
                 <td className="px-6 py-4 border-b border-surface-hairline">HVAC Systems</td>
                 <td className="px-6 py-4 border-b border-surface-hairline">21,000</td>
-                <td className="px-6 py-4 border-b border-surface-hairline">0.87 kgCO2e/kWh</td>
-                <td className="px-6 py-4 border-b border-surface-hairline text-right font-serif text-base text-brand-primary">18.2</td>
+                <td className="px-6 py-4 border-b border-surface-hairline">{co2Factor} kgCO2e/kWh</td>
+                <td className="px-6 py-4 border-b border-surface-hairline text-right font-serif text-base text-brand-primary">{calculateEmissions(21000)}</td>
               </tr>
             </tbody>
           </table>

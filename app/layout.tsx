@@ -1,7 +1,7 @@
 import type {Metadata} from 'next';
 import { Inter, EB_Garamond } from 'next/font/google';
 import './globals.css'; // Global styles
-import { DashboardLayout } from '@/components/DashboardLayout';
+import { RootLayoutClient } from '@/components/RootLayoutClient';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -24,7 +24,7 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
   return (
     <html lang="en" className={`${inter.variable} ${ebGaramond.variable}`}>
       <body className="antialiased" suppressHydrationWarning>
-        <DashboardLayout>{children}</DashboardLayout>
+        <RootLayoutClient>{children}</RootLayoutClient>
       </body>
     </html>
   );

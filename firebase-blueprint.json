@@ -1,0 +1,22 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "User accounts and roles",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "role": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["name", "email", "role"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles stored by uid"
+    }
+  }
+}

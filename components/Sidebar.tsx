@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Users, Plug, Trophy, Settings, Box, LayoutDashboard, Activity, FileText, Router } from "lucide-react";
+import { Users, Plug, Trophy, Settings, Box, LayoutDashboard, Activity, FileText, Router, LogOut } from "lucide-react";
+import { auth } from "@/lib/firebase";
+import { signOut } from "firebase/auth";
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -14,6 +16,10 @@ export function Sidebar() {
         ? "bg-surface-card text-brand-primary" 
         : "text-text-muted hover:bg-surface-soft"
     }`;
+  };
+
+  const handleLogout = async () => {
+    await signOut(auth);
   };
 
   return (
@@ -65,13 +71,18 @@ export function Sidebar() {
       </nav>
 
       <div className="mt-auto">
-        <div className="p-4 bg-surface-dark rounded-2xl text-text-on-dark shadow-sm">
+        <div className="p-4 bg-surface-dark rounded-2xl text-text-on-dark shadow-sm mb-4">
           <div className="text-[10px] text-text-on-dark-soft mb-1 uppercase tracking-widest font-bold">Aggregation Score</div>
           <div className="text-2xl font-serif">97.5%</div>
           <div className="w-full bg-surface-dark-elevated h-1 rounded-full mt-2">
             <div className="bg-brand-primary h-full rounded-full" style={{ width: '97.5%' }}></div>
           </div>
         </div>
+
+        <button onClick={handleLogout} className="flex items-center gap-3 w-full p-2 text-text-muted hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-colors text-sm font-medium">
+          <LogOut className="w-4 h-4 ml-0.5" />
+          <span>Log out</span>
+        </button>
       </div>
     </aside>
   );

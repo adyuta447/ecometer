@@ -28,7 +28,7 @@ export function DigitalTwinSimulator({
           <div>
             <h2 className="text-xl font-serif font-bold italic flex items-center gap-2">
               <Activity className="w-5 h-5 text-brand-primary" />
-              Digital Twin Simulator
+              Simulator Digital Twin
             </h2>
             <p className="text-[10px] uppercase font-bold text-text-on-dark-soft tracking-widest mt-1">
               {device.name}
@@ -52,7 +52,7 @@ export function DigitalTwinSimulator({
             <div className="grid grid-cols-2 gap-3">
               <div className="bg-surface-dark p-4 rounded-2xl border border-surface-hairline/10">
                 <span className="text-[10px] font-bold uppercase tracking-widest text-text-on-dark-soft block mb-1">
-                  Voltage
+                  Tegangan
                 </span>
                 <span className="font-mono text-lg font-medium text-white">
                   {currentMetrics.voltage}{" "}
@@ -61,7 +61,7 @@ export function DigitalTwinSimulator({
               </div>
               <div className="bg-surface-dark p-4 rounded-2xl border border-surface-hairline/10">
                 <span className="text-[10px] font-bold uppercase tracking-widest text-text-on-dark-soft block mb-1">
-                  Current
+                  Arus
                 </span>
                 <span className="font-mono text-lg font-medium text-white">
                   {currentMetrics.current}{" "}
@@ -70,7 +70,7 @@ export function DigitalTwinSimulator({
               </div>
               <div className="bg-surface-dark p-4 rounded-2xl border border-surface-hairline/10">
                 <span className="text-[10px] font-bold uppercase tracking-widest text-text-on-dark-soft block mb-1">
-                  Power
+                  Daya
                 </span>
                 <span className="font-mono text-lg font-medium text-white">
                   {currentMetrics.power}{" "}
@@ -95,7 +95,7 @@ export function DigitalTwinSimulator({
             </div>
           ) : (
             <div className="text-sm text-text-on-dark-soft p-6 bg-surface-dark border border-surface-hairline/10 rounded-2xl text-center">
-              System standby. Activate to transmit real-time telemetry.
+              Sistem standby. Aktifkan untuk mulai transmisi telemetri real-time.
             </div>
           )}
         </div>
@@ -110,11 +110,11 @@ export function DigitalTwinSimulator({
         >
           {isSimulating ? (
             <>
-              <StopCircle className="w-5 h-5 mr-2" /> Suspend Telemetry
+              <StopCircle className="w-5 h-5 mr-2" /> Hentikan Telemetri
             </>
           ) : (
             <>
-              <Power className="w-5 h-5 mr-2" /> Initialize Digital Twin
+              <Power className="w-5 h-5 mr-2" /> Aktifkan Digital Twin
             </>
           )}
         </button>

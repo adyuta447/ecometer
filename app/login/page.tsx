@@ -20,16 +20,16 @@ export default function LoginPage() {
   const router = useRouter();
   const { addNotification } = useNotification();
 
-  const handleEmailLogin = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
       const cred = await signInWithEmailAndPassword(auth, email, password);
-      await logActivity(cred.user.uid, "login", `Email login: ${email}`, "success", { method: "email" });
-      addNotification("Login successful. Initializing workspace.", "success");
+      await logActivity(cred.user.uid, "login", `Login via email: ${email}`, "success", { method: "email" });
+      addNotification("Login berhasil. Menginisialisasi workspace.", "success");
       router.push("/");
     } catch (err: any) {
-      addNotification(err.message || "Failed to login", "error");
+      addNotification(err.message || "Login gagal", "error");
     } finally {
       setLoading(false);
     }
@@ -40,11 +40,11 @@ export default function LoginPage() {
     const provider = new GoogleAuthProvider();
     try {
       const cred = await signInWithPopup(auth, provider);
-      await logActivity(cred.user.uid, "login", `Google login: ${cred.user.email}`, "success", { method: "google" });
-      addNotification("Google Login successful.", "success");
+      await logActivity(cred.user.uid, "login", `Login via Google: ${cred.user.email}`, "success", { method: "google" });
+      addNotification("Login Google berhasil.", "success");
       router.push("/");
     } catch (err: any) {
-      addNotification(err.message || "Failed to login", "error");
+      addNotification(err.message || "Login gagal", "error");
     } finally {
       setLoading(false);
     }
@@ -52,30 +52,17 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative">
-      {/* Dynamic Background */}
-      <div className="absolute inset-0 bg-surface-canvas overflow-hidden">
-        <div className="absolute top-[-10%] right-[-5%] w-[40vw] h-[40vw] bg-brand-primary/10 rounded-full blur-[100px] animate-pulse" />
-        <div
-          className="absolute bottom-[-10%] left-[-5%] w-[30vw] h-[30vw] bg-brand-accent-teal/10 rounded-full blur-[100px] animate-pulse"
-          style={{ animationDelay: "2s" }}
-        />
-      </div>
+      <div className="absolute inset-0 bg-surface-canvas"></div>
 
       <div className="w-full max-w-md bg-surface-dark-elevated border border-surface-hairline/20 rounded-[32px] p-8 shadow-2xl relative z-10 text-white">
         <div className="mb-8">
-          <h1 className="text-3xl font-serif font-bold italic mb-2">
-            EcoMeter
-          </h1>
-          <p className="text-sm text-text-on-dark-soft tracking-wide">
-            Sign in to access your energy portfolio.
-          </p>
+          <h1 className="text-3xl font-serif font-bold italic mb-2">Masuk ke EcoMeter</h1>
+          <p className="text-sm text-text-on-dark-soft tracking-wide">Pantau dan kelola portofolio energi kamu.</p>
         </div>
 
-        <form onSubmit={handleEmailLogin} className="space-y-5">
+        <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className="block text-[10px] font-bold uppercase tracking-widest text-text-on-dark-soft mb-2">
-              Email Address
-            </label>
+            <label className="block text-[10px] font-bold uppercase tracking-widest text-text-on-dark-soft mb-2">Alamat Email</label>
             <input
               type="email"
               value={email}
@@ -86,9 +73,7 @@ export default function LoginPage() {
             />
           </div>
           <div>
-            <label className="block text-[10px] font-bold uppercase tracking-widest text-text-on-dark-soft mb-2">
-              Password
-            </label>
+            <label className="block text-[10px] font-bold uppercase tracking-widest text-text-on-dark-soft mb-2">Kata Sandi</label>
             <input
               type="password"
               value={password}
@@ -98,12 +83,13 @@ export default function LoginPage() {
               required
             />
           </div>
+          
           <button
             type="submit"
             disabled={loading}
             className="w-full bg-brand-primary text-text-on-dark px-4 py-3 rounded-xl text-sm font-bold tracking-wide hover:bg-brand-primary-active transition-colors mt-2 flex justify-center items-center"
           >
-            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Sign In"}
+            {loading ? <Loader2 className="w-5 h-5 animate-spin"/> : "Masuk"}
           </button>
         </form>
 
@@ -112,9 +98,7 @@ export default function LoginPage() {
             <div className="w-full border-t border-surface-hairline/10"></div>
           </div>
           <div className="relative flex justify-center text-[10px] uppercase font-bold tracking-widest">
-            <span className="bg-surface-dark-elevated px-2 text-text-on-dark-soft">
-              or continue with
-            </span>
+            <span className="bg-surface-dark-elevated px-2 text-text-on-dark-soft">atau lanjutkan dengan</span>
           </div>
         </div>
 
@@ -128,13 +112,7 @@ export default function LoginPage() {
         </button>
 
         <p className="mt-6 text-center text-sm text-text-on-dark-soft">
-          Don&apos;t have an account?{" "}
-          <Link
-            href="/register"
-            className="text-brand-accent-teal hover:underline font-medium"
-          >
-            Sign up
-          </Link>
+          Belum punya akun? <Link href="/register" className="text-brand-accent-teal hover:underline font-medium">Daftar</Link>
         </p>
       </div>
     </div>

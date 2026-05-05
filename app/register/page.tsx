@@ -29,10 +29,10 @@ export default function RegisterPage() {
         role: "admin", 
         createdAt: new Date().toISOString()
       });
-      addNotification("Account created successfully. Welcome to EcoMeter.", "success");
+      addNotification("Akun berhasil dibuat. Selamat datang di EcoMeter!", "success");
       router.push("/");
     } catch (err: any) {
-      addNotification(err.message || "Failed to register", "error");
+      addNotification(err.message || "Gagal mendaftar", "error");
     } finally {
       setLoading(false);
     }
@@ -49,10 +49,10 @@ export default function RegisterPage() {
         role: "admin",
         createdAt: new Date().toISOString()
       }, { merge: true });
-      addNotification("Google auto-registration complete.", "success");
+      addNotification("Registrasi Google selesai otomatis.", "success");
       router.push("/");
     } catch (err: any) {
-      addNotification(err.message || "Failed to register with Google", "error");
+      addNotification(err.message || "Gagal mendaftar dengan Google", "error");
     } finally {
       setLoading(false);
     }
@@ -60,31 +60,28 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative">
-      <div className="absolute inset-0 bg-surface-canvas overflow-hidden">
-        <div className="absolute top-[-10%] right-[-5%] w-[40vw] h-[40vw] bg-brand-primary/10 rounded-full blur-[100px] animate-pulse" />
-        <div className="absolute bottom-[-10%] left-[-5%] w-[30vw] h-[30vw] bg-brand-accent-teal/10 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '2s' }} />
-      </div>
+      <div className="absolute inset-0 bg-surface-canvas"></div>
 
       <div className="w-full max-w-md bg-surface-dark-elevated border border-surface-hairline/20 rounded-[32px] p-8 shadow-2xl relative z-10 text-white">
         <div className="mb-8">
-          <h1 className="text-3xl font-serif font-bold italic mb-2">Create Account</h1>
-          <p className="text-sm text-text-on-dark-soft tracking-wide">Start managing your energy portfolio.</p>
+          <h1 className="text-3xl font-serif font-bold italic mb-2">Buat Akun</h1>
+          <p className="text-sm text-text-on-dark-soft tracking-wide">Mulai kelola portofolio energi kamu sekarang.</p>
         </div>
 
         <form onSubmit={handleRegister} className="space-y-4">
           <div>
-            <label className="block text-[10px] font-bold uppercase tracking-widest text-text-on-dark-soft mb-2">Full Name</label>
+            <label className="block text-[10px] font-bold uppercase tracking-widest text-text-on-dark-soft mb-2">Nama Lengkap</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="w-full bg-surface-dark border border-surface-hairline/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-primary transition-colors placeholder:text-text-on-dark-soft/50"
-              placeholder="John Doe"
+              placeholder="Budi Santoso"
               required
             />
           </div>
           <div>
-            <label className="block text-[10px] font-bold uppercase tracking-widest text-text-on-dark-soft mb-2">Email Address</label>
+            <label className="block text-[10px] font-bold uppercase tracking-widest text-text-on-dark-soft mb-2">Alamat Email</label>
             <input
               type="email"
               value={email}
@@ -95,7 +92,7 @@ export default function RegisterPage() {
             />
           </div>
           <div>
-            <label className="block text-[10px] font-bold uppercase tracking-widest text-text-on-dark-soft mb-2">Password</label>
+            <label className="block text-[10px] font-bold uppercase tracking-widest text-text-on-dark-soft mb-2">Kata Sandi</label>
             <input
               type="password"
               value={password}
@@ -111,7 +108,7 @@ export default function RegisterPage() {
             disabled={loading}
             className="w-full bg-brand-primary text-text-on-dark px-4 py-3 rounded-xl text-sm font-bold tracking-wide hover:bg-brand-primary-active transition-colors mt-2 flex justify-center items-center"
           >
-            {loading ? <Loader2 className="w-5 h-5 animate-spin"/> : "Sign Up"}
+            {loading ? <Loader2 className="w-5 h-5 animate-spin"/> : "Daftar"}
           </button>
         </form>
 
@@ -120,7 +117,7 @@ export default function RegisterPage() {
             <div className="w-full border-t border-surface-hairline/10"></div>
           </div>
           <div className="relative flex justify-center text-[10px] uppercase font-bold tracking-widest">
-            <span className="bg-surface-dark-elevated px-2 text-text-on-dark-soft">or continue with</span>
+            <span className="bg-surface-dark-elevated px-2 text-text-on-dark-soft">atau lanjutkan dengan</span>
           </div>
         </div>
 
@@ -134,7 +131,7 @@ export default function RegisterPage() {
         </button>
 
         <p className="mt-6 text-center text-sm text-text-on-dark-soft">
-          Already have an account? <Link href="/login" className="text-brand-accent-teal hover:underline font-medium">Log in</Link>
+          Sudah punya akun? <Link href="/login" className="text-brand-accent-teal hover:underline font-medium">Masuk</Link>
         </p>
       </div>
     </div>

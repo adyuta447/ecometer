@@ -3,8 +3,6 @@
 import { useState, useEffect, useMemo } from "react";
 import {
   Server,
-  Monitor,
-  HardDrive,
   Filter,
   Plus,
   Shield,
@@ -14,8 +12,7 @@ import {
   Trash2,
   MapPin,
   Router,
-  Activity,
-  Zap,
+  Building2,
 } from "lucide-react";
 import {
   collection,
@@ -25,27 +22,12 @@ import {
   addDoc,
   doc,
   deleteDoc,
-  updateDoc,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/components/AuthProvider";
 import { useSimulator } from "@/components/SimulatorProvider";
 import { logActivity } from "@/lib/activityLog";
 import { useNotification } from "@/components/NotificationProvider";
-
-// Predefined locations
-const LOCATIONS = [
-  "Lantai 1 - Lobby",
-  "Lantai 2 - Open Office",
-  "Lantai 3 - Server Room",
-  "Lantai 4 - Meeting Rooms",
-  "Lantai 5 - Executive Suite",
-  "Basement - Utility",
-  "Rooftop - Solar Array",
-  "Annex Building A",
-  "Annex Building B",
-  "Parking Level B1",
-];
 
 export default function GroupsPage() {
   const { user } = useAuth();
@@ -58,11 +40,12 @@ export default function GroupsPage() {
   const [saving, setSaving] = useState(false);
   const [activeSegment, setActiveSegment] = useState<any>(null);
 
-  // New group form state
+  // State form grup baru
   const [newGroup, setNewGroup] = useState({
     name: "",
     description: "",
-    locations: [] as string[],
+    location: "",
+    floor: "",
     deviceIds: [] as string[],
   });
 
@@ -70,14 +53,14 @@ export default function GroupsPage() {
     async function fetchData() {
       if (!user) return;
       try {
-        // Fetch groups
+        // Ambil data grup
         const gq = query(collection(db, "groups"), where("userId", "==", user.uid));
         const gqs = await getDocs(gq);
         const groupData = gqs.docs.map((d) => ({ id: d.id, ...d.data() }));
         setGroups(groupData);
         if (groupData.length > 0) setActiveSegment(groupData[0]);
 
-        // Fetch devices for assignment
+        // Ambil data perangkat untuk assignment
         const dq = query(collection(db, "devices"), where("userId", "==", user.uid));
         const dqs = await getDocs(dq);
         setDevices(dqs.docs.map((d) => ({ id: d.id, ...d.data() })));
@@ -95,7 +78,6 @@ export default function GroupsPage() {
     if (newGroup.name && user) {
       setSaving(true);
       try {
-        // Calculate initial stats from selected devices
         const selectedDevices = devices.filter((d) => newGroup.deviceIds.includes(d.id));
         const usage = selectedDevices.length > 0
           ? `${(selectedDevices.length * 420).toLocaleString()} kWh`
@@ -110,7 +92,9 @@ export default function GroupsPage() {
         const groupPayload = {
           name: newGroup.name,
           description: newGroup.description,
-          locations: newGroup.locations,
+          location: newGroup.location,
+          floor: newGroup.floor,
+          locations: [newGroup.location, newGroup.floor].filter(Boolean),
           deviceIds: newGroup.deviceIds,
           usage,
           co2,
@@ -123,18 +107,19 @@ export default function GroupsPage() {
         const created = { id: docRef.id, ...groupPayload };
         setGroups([...groups, created]);
         setIsModalOpen(false);
-        setNewGroup({ name: "", description: "", locations: [], deviceIds: [] });
+        setNewGroup({ name: "", description: "", location: "", floor: "", deviceIds: [] });
         if (!activeSegment) setActiveSegment(created);
 
-        await logActivity(user.uid, "group_created", `Virtual group created: ${newGroup.name} with ${newGroup.deviceIds.length} device(s)`, "success", {
+        await logActivity(user.uid, "group_created", `Grup virtual dibuat: ${newGroup.name} dengan ${newGroup.deviceIds.length} perangkat`, "success", {
           groupId: docRef.id,
-          locations: newGroup.locations,
+          location: newGroup.location,
+          floor: newGroup.floor,
           deviceCount: newGroup.deviceIds.length,
         });
-        addNotification(`Group "${newGroup.name}" created successfully.`, "success");
+        addNotification(`Grup "${newGroup.name}" berhasil dibuat.`, "success");
       } catch (error) {
-        console.error("Failed to create group", error);
-        addNotification("Failed to create group.", "error");
+        console.error("Gagal membuat grup", error);
+        addNotification("Gagal membuat grup.", "error");
       } finally {
         setSaving(false);
       }
@@ -143,7 +128,7 @@ export default function GroupsPage() {
 
   const handleDelete = async (id: string) => {
     const group = groups.find((g) => g.id === id);
-    if (confirm("Delete this virtual group?")) {
+    if (confirm("Hapus grup virtual ini?")) {
       try {
         await deleteDoc(doc(db, "groups", id));
         setGroups(groups.filter((g) => g.id !== id));
@@ -151,22 +136,13 @@ export default function GroupsPage() {
           setActiveSegment(groups.find((g) => g.id !== id) || null);
         }
         if (user && group) {
-          await logActivity(user.uid, "group_deleted", `Virtual group deleted: ${group.name}`, "warning", { groupId: id });
+          await logActivity(user.uid, "group_deleted", `Grup virtual dihapus: ${group.name}`, "warning", { groupId: id });
         }
-        addNotification(`Group "${group?.name}" deleted.`, "info");
+        addNotification(`Grup "${group?.name}" dihapus.`, "info");
       } catch (error) {
-        console.error("Failed to delete group", error);
+        console.error("Gagal menghapus grup", error);
       }
     }
-  };
-
-  const toggleLocation = (loc: string) => {
-    setNewGroup((prev) => ({
-      ...prev,
-      locations: prev.locations.includes(loc)
-        ? prev.locations.filter((l) => l !== loc)
-        : [...prev.locations, loc],
-    }));
   };
 
   const toggleDevice = (deviceId: string) => {
@@ -178,7 +154,7 @@ export default function GroupsPage() {
     }));
   };
 
-  // Compute real-time stats for the active group
+  // Hitung statistik real-time untuk grup aktif
   const groupDeviceStats = useMemo(() => {
     if (!activeSegment?.deviceIds?.length) return null;
     const groupDeviceIds = activeSegment.deviceIds as string[];
@@ -209,10 +185,10 @@ export default function GroupsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-serif font-bold italic text-text-ink mb-1">
-            Virtual Device Grouping
+            Grup Perangkat Virtual
           </h1>
           <p className="text-sm text-text-muted">
-            Segment and isolate network data like VLANs.
+            Kelompokkan dan pisahkan data jaringan seperti VLAN.
           </p>
         </div>
         <button
@@ -220,16 +196,16 @@ export default function GroupsPage() {
           className="flex items-center gap-2 bg-brand-primary text-text-on-dark px-4 py-2 rounded-xl text-sm font-medium hover:bg-brand-primary-active transition-colors"
         >
           <Plus className="w-4 h-4" />
-          Create Segment
+          Buat Grup Baru
         </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        {/* Left pane: Topology/Tree */}
+        {/* Panel kiri: Daftar Segmen */}
         <div className="col-span-1 bg-surface-card rounded-3xl p-5 border border-surface-hairline">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-[11px] font-bold uppercase tracking-widest text-text-muted-soft">
-              Segments
+              Segmen
             </h3>
             <Filter className="w-3 h-3 text-text-muted-soft" />
           </div>
@@ -255,7 +231,7 @@ export default function GroupsPage() {
                   <div className="flex items-center gap-1">
                     {g.deviceIds?.length > 0 && (
                       <span className="text-[9px] px-1.5 py-0.5 bg-surface-soft text-text-muted rounded-md">
-                        {g.deviceIds.length} dev
+                        {g.deviceIds.length} alat
                       </span>
                     )}
                     <span
@@ -273,13 +249,13 @@ export default function GroupsPage() {
             })}
             {groups.length === 0 && (
               <div className="text-xs text-text-muted p-2">
-                No segments created yet.
+                Belum ada segmen. Yuk bikin!
               </div>
             )}
           </div>
         </div>
 
-        {/* Right pane: Group Details */}
+        {/* Panel kanan: Detail Grup */}
         <div className="col-span-3 space-y-6">
           {activeSegment ? (
             <>
@@ -294,7 +270,7 @@ export default function GroupsPage() {
                         {activeSegment.name}
                       </h2>
                       <span className="px-2 py-0.5 bg-brand-accent-teal/10 text-brand-accent-teal text-[10px] font-bold uppercase tracking-widest rounded-md">
-                        Isolated
+                        Terisolasi
                       </span>
                       {groupDeviceStats && groupDeviceStats.activeDevices > 0 && (
                         <span className="flex items-center gap-1 px-2 py-0.5 bg-brand-accent-teal/10 text-brand-accent-teal text-[10px] font-bold uppercase tracking-widest rounded-md">
@@ -304,19 +280,22 @@ export default function GroupsPage() {
                       )}
                     </div>
                     <p className="text-sm text-text-muted">
-                      {activeSegment.description || `Usage: ${activeSegment.usage} | Emissions: ${activeSegment.co2}`}
+                      {activeSegment.description || `Pemakaian: ${activeSegment.usage} | Emisi: ${activeSegment.co2}`}
                     </p>
-                    {activeSegment.locations?.length > 0 && (
+                    {(activeSegment.location || activeSegment.floor) && (
                       <div className="flex flex-wrap gap-1.5 mt-2">
-                        {activeSegment.locations.map((loc: string) => (
-                          <span
-                            key={loc}
-                            className="inline-flex items-center gap-1 px-2 py-0.5 bg-surface-soft rounded-md text-[10px] text-text-muted font-medium"
-                          >
+                        {activeSegment.location && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-surface-soft rounded-md text-[10px] text-text-muted font-medium">
                             <MapPin className="w-2.5 h-2.5" />
-                            {loc}
+                            {activeSegment.location}
                           </span>
-                        ))}
+                        )}
+                        {activeSegment.floor && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-surface-soft rounded-md text-[10px] text-text-muted font-medium">
+                            <Building2 className="w-2.5 h-2.5" />
+                            {activeSegment.floor}
+                          </span>
+                        )}
                       </div>
                     )}
                   </div>
@@ -331,12 +310,12 @@ export default function GroupsPage() {
                 </div>
               </div>
 
-              {/* Real-time stats for group devices */}
+              {/* Statistik real-time per grup */}
               {groupDeviceStats && (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="bg-surface-card rounded-2xl p-4 border border-surface-hairline">
                     <div className="text-[10px] uppercase font-bold text-text-muted-soft tracking-widest mb-1">
-                      Total Devices
+                      Total Perangkat
                     </div>
                     <div className="text-xl font-serif font-bold text-text-ink">
                       {groupDeviceStats.totalDevices}
@@ -344,7 +323,7 @@ export default function GroupsPage() {
                   </div>
                   <div className="bg-surface-card rounded-2xl p-4 border border-surface-hairline">
                     <div className="text-[10px] uppercase font-bold text-text-muted-soft tracking-widest mb-1">
-                      Active (Sim)
+                      Aktif (Sim)
                     </div>
                     <div className="text-xl font-serif font-bold text-brand-accent-teal">
                       {groupDeviceStats.activeDevices}
@@ -352,7 +331,7 @@ export default function GroupsPage() {
                   </div>
                   <div className="bg-surface-card rounded-2xl p-4 border border-surface-hairline">
                     <div className="text-[10px] uppercase font-bold text-text-muted-soft tracking-widest mb-1">
-                      Group Power
+                      Daya Grup
                     </div>
                     <div className="text-xl font-serif font-bold text-brand-accent-amber">
                       {(groupDeviceStats.totalPower / 1000).toFixed(2)} kW
@@ -360,7 +339,7 @@ export default function GroupsPage() {
                   </div>
                   <div className="bg-surface-card rounded-2xl p-4 border border-surface-hairline">
                     <div className="text-[10px] uppercase font-bold text-text-muted-soft tracking-widest mb-1">
-                      Anomalies
+                      Anomali
                     </div>
                     <div className={`text-xl font-serif font-bold ${groupDeviceStats.anomalies > 0 ? "text-brand-primary" : "text-brand-accent-teal"}`}>
                       {groupDeviceStats.anomalies}
@@ -369,11 +348,11 @@ export default function GroupsPage() {
                 </div>
               )}
 
-              {/* Assigned Devices */}
+              {/* Perangkat yang Ditugaskan */}
               {activeSegment.deviceIds?.length > 0 && (
                 <div className="bg-surface-card rounded-3xl p-5 border border-surface-hairline">
                   <h3 className="text-[11px] font-bold uppercase tracking-widest text-text-muted-soft mb-4">
-                    Assigned Devices
+                    Perangkat di Grup Ini
                   </h3>
                   <div className="space-y-2">
                     {devices
@@ -412,14 +391,14 @@ export default function GroupsPage() {
                       })}
                     {devices.filter((d) => activeSegment.deviceIds.includes(d.id)).length === 0 && (
                       <p className="text-xs text-text-muted p-2">
-                        Assigned devices not found. They may have been deleted.
+                        Perangkat yang ditugaskan tidak ditemukan. Mungkin sudah dihapus.
                       </p>
                     )}
                   </div>
                 </div>
               )}
 
-              {/* Capacity visualization */}
+              {/* Visualisasi kapasitas */}
               <div className="bg-surface-soft rounded-[24px] p-5">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-sm font-bold uppercase tracking-tighter text-text-ink">
@@ -438,7 +417,7 @@ export default function GroupsPage() {
                   ></div>
                 </div>
                 <div className="flex justify-between text-[10px] text-text-muted-soft">
-                  <span>{activeSegment.capacityPercentage || "0%"} Capacity</span>
+                  <span>{activeSegment.capacityPercentage || "0%"} Kapasitas</span>
                   <span>{activeSegment.co2}</span>
                 </div>
               </div>
@@ -447,20 +426,20 @@ export default function GroupsPage() {
             <div className="bg-surface-card rounded-3xl p-12 border border-surface-hairline text-center flex flex-col items-center justify-center min-h-[300px]">
               <Shield className="w-12 h-12 text-surface-hairline mb-4" />
               <p className="text-text-muted">
-                Select or create a virtual group to view its telemetry.
+                Pilih atau buat grup virtual buat lihat data telemetrinya.
               </p>
             </div>
           )}
         </div>
       </div>
 
-      {/* Create Group Modal */}
+      {/* Modal Buat Grup */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-surface-dark/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-surface-dark-elevated border border-surface-hairline/20 rounded-[32px] p-8 w-full max-w-lg text-text-on-dark shadow-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-serif font-bold italic">
-                Create Virtual Group
+                Buat Grup Virtual
               </h2>
               <button
                 onClick={() => setIsModalOpen(false)}
@@ -471,68 +450,72 @@ export default function GroupsPage() {
             </div>
 
             <form onSubmit={handleCreate} className="space-y-5">
-              {/* Group Name */}
+              {/* Nama Grup */}
               <div>
                 <label className="block text-[10px] font-bold uppercase tracking-widest text-text-on-dark-soft mb-2">
-                  Group Name
+                  Nama Grup
                 </label>
                 <input
                   type="text"
                   value={newGroup.name}
                   onChange={(e) => setNewGroup({ ...newGroup, name: e.target.value })}
                   autoFocus
-                  placeholder="e.g. Server Room B"
+                  placeholder="cth. Server Room B"
                   className="w-full bg-surface-dark border border-surface-hairline/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-primary text-white transition-colors placeholder:text-text-on-dark-soft/50"
                   required
                 />
               </div>
 
-              {/* Description */}
+              {/* Deskripsi */}
               <div>
                 <label className="block text-[10px] font-bold uppercase tracking-widest text-text-on-dark-soft mb-2">
-                  Description (Optional)
+                  Deskripsi (Opsional)
                 </label>
                 <textarea
                   value={newGroup.description}
                   onChange={(e) => setNewGroup({ ...newGroup, description: e.target.value })}
-                  placeholder="Brief description of this virtual group"
+                  placeholder="Deskripsi singkat grup ini"
                   rows={2}
                   className="w-full bg-surface-dark border border-surface-hairline/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-primary text-white transition-colors placeholder:text-text-on-dark-soft/50 resize-none"
                 />
               </div>
 
-              {/* Location Selection */}
+              {/* Lokasi — input biasa */}
               <div>
                 <label className="block text-[10px] font-bold uppercase tracking-widest text-text-on-dark-soft mb-2">
-                  Locations ({newGroup.locations.length} selected)
+                  Lokasi
                 </label>
-                <div className="grid grid-cols-2 gap-2 max-h-36 overflow-y-auto pr-1">
-                  {LOCATIONS.map((loc) => (
-                    <button
-                      key={loc}
-                      type="button"
-                      onClick={() => toggleLocation(loc)}
-                      className={`flex items-center gap-2 p-2 rounded-lg text-xs font-medium transition-colors text-left ${
-                        newGroup.locations.includes(loc)
-                          ? "bg-brand-primary/20 text-brand-primary border border-brand-primary/30"
-                          : "bg-surface-dark border border-surface-hairline/10 text-text-on-dark-soft hover:border-surface-hairline/30"
-                      }`}
-                    >
-                      <MapPin className="w-3 h-3 flex-shrink-0" />
-                      <span className="truncate">{loc}</span>
-                    </button>
-                  ))}
-                </div>
+                <input
+                  type="text"
+                  value={newGroup.location}
+                  onChange={(e) => setNewGroup({ ...newGroup, location: e.target.value })}
+                  placeholder="cth. Gedung Utama, Jl. Sudirman No.10"
+                  className="w-full bg-surface-dark border border-surface-hairline/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-primary text-white transition-colors placeholder:text-text-on-dark-soft/50"
+                />
               </div>
 
-              {/* Device Selection */}
+              {/* Lantai — input biasa */}
               <div>
                 <label className="block text-[10px] font-bold uppercase tracking-widest text-text-on-dark-soft mb-2">
-                  Assign Devices ({newGroup.deviceIds.length} selected)
+                  Lantai
+                </label>
+                <input
+                  type="text"
+                  value={newGroup.floor}
+                  onChange={(e) => setNewGroup({ ...newGroup, floor: e.target.value })}
+                  placeholder="cth. Lantai 3, Sayap Barat"
+                  className="w-full bg-surface-dark border border-surface-hairline/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-primary text-white transition-colors placeholder:text-text-on-dark-soft/50"
+                />
+              </div>
+
+              {/* Pilih Perangkat */}
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-text-on-dark-soft mb-2">
+                  Pilih Perangkat ({newGroup.deviceIds.length} dipilih)
                 </label>
                 {devices.length === 0 ? (
                   <p className="text-xs text-text-on-dark-soft p-3 bg-surface-dark rounded-xl border border-surface-hairline/10">
-                    No devices registered. Register devices first in IoT Devices page.
+                    Belum ada perangkat terdaftar. Daftarkan dulu di halaman Perangkat IoT.
                   </p>
                 ) : (
                   <div className="space-y-1.5 max-h-44 overflow-y-auto pr-1">
@@ -585,7 +568,7 @@ export default function GroupsPage() {
                 className="w-full bg-brand-primary text-text-on-dark px-4 py-3 rounded-xl text-sm font-bold tracking-wide hover:bg-brand-primary-active transition-colors mt-6 flex justify-center items-center gap-2"
               >
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-                {saving ? "Creating..." : "Create Virtual Group"}
+                {saving ? "Membuat..." : "Buat Grup Virtual"}
               </button>
             </form>
           </div>

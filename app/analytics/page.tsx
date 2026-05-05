@@ -28,15 +28,16 @@ import { db } from "@/lib/firebase";
 import { useSimulator } from "@/components/SimulatorProvider";
 import { useNotification } from "@/components/NotificationProvider";
 import { logActivity } from "@/lib/activityLog";
+import { StatusBadge } from "@/components/atoms/StatusBadge";
 
 const baseData = [
-  { day: "Mon", actual: 14200, predicted: 14200 },
-  { day: "Tue", actual: 14800, predicted: 14700 },
-  { day: "Wed", actual: 14500, predicted: 14600 },
-  { day: "Thu", actual: 15200, predicted: 15100 },
-  { day: "Fri", actual: 14900, predicted: 15000 },
-  { day: "Sat", actual: null, predicted: 14800 },
-  { day: "Sun", actual: null, predicted: 14600 },
+  { day: "Sen", actual: 14200, predicted: 14200 },
+  { day: "Sel", actual: 14800, predicted: 14700 },
+  { day: "Rab", actual: 14500, predicted: 14600 },
+  { day: "Kam", actual: 15200, predicted: 15100 },
+  { day: "Jum", actual: 14900, predicted: 15000 },
+  { day: "Sab", actual: null, predicted: 14800 },
+  { day: "Min", actual: null, predicted: 14600 },
 ];
 
 export default function AnalyticsPage() {
@@ -47,7 +48,7 @@ export default function AnalyticsPage() {
   const [loading, setLoading] = useState(true);
   const [tariff, setTariff] = useState(1444.7);
 
-  // Realtime noise for the chart when simulations are active
+  // Noise real-time saat simulasi aktif
   const [liveFlux, setLiveFlux] = useState(0);
 
   useEffect(() => {
@@ -64,7 +65,7 @@ export default function AnalyticsPage() {
           if (s.tariff) setTariff(Number(s.tariff));
         }
       } catch (error) {
-        console.error("Failed to load analytics data:", error);
+        console.error("Gagal memuat data analitik:", error);
       } finally {
         setLoading(false);
       }
@@ -72,14 +73,10 @@ export default function AnalyticsPage() {
     fetchData();
   }, [user]);
 
-  // Create a fluctuation effect when simulation is active
+  // Efek fluktuasi saat simulasi aktif
   useEffect(() => {
-    if (!isAnySimulationActive) {
-      return;
-    }
-    // Update every 2 seconds to match simulator tick
+    if (!isAnySimulationActive) return;
     const interval = setInterval(() => {
-      // Create a random +/- noise based on active total power
       const maxNoise = 300 + aggregatedStats.totalPower / 100;
       const noise = Math.random() * maxNoise * 2 - maxNoise;
       setLiveFlux(noise);
@@ -92,17 +89,14 @@ export default function AnalyticsPage() {
       let adjustedPredicted = d.predicted;
       let adjustedActual = d.actual;
 
-      // Apply reduction cut to future predictions
-      if (d.day === "Fri" || d.day === "Sat" || d.day === "Sun") {
+      if (d.day === "Jum" || d.day === "Sab" || d.day === "Min") {
         const reductionFactor = efficiencyCut / 100;
         adjustedPredicted =
-          d.predicted * (1 - reductionFactor * (d.day === "Fri" ? 0.5 : 1));
+          d.predicted * (1 - reductionFactor * (d.day === "Jum" ? 0.5 : 1));
       }
 
-      // Inject live simulation noise into 'Today' (Fri)
-      if (d.day === "Fri" && isAnySimulationActive && adjustedActual !== null) {
+      if (d.day === "Jum" && isAnySimulationActive && adjustedActual !== null) {
         adjustedActual = adjustedActual + liveFlux;
-        // Make predicted slightly follow actual during live sim
         adjustedPredicted = adjustedPredicted + liveFlux * 0.3;
       }
 
@@ -114,12 +108,11 @@ export default function AnalyticsPage() {
     });
   }, [efficiencyCut, liveFlux, isAnySimulationActive]);
 
-  // Real-time power chart from metrics history
+  // Chart daya real-time dari riwayat metrik
   const powerChartData = useMemo(() => {
     if (metricsHistory.length === 0) return [];
-    // Group by timestamp and sum power
     const grouped = metricsHistory.reduce<Record<string, { time: string; power: number; count: number }>>((acc, m) => {
-      const key = m.timestamp.slice(11, 19); // HH:MM:SS
+      const key = m.timestamp.slice(11, 19);
       if (!acc[key]) acc[key] = { time: key, power: 0, count: 0 };
       acc[key].power += m.power;
       acc[key].count++;
@@ -137,25 +130,23 @@ export default function AnalyticsPage() {
     return total;
   }, [efficiencyCut, isAnySimulationActive, liveFlux]);
 
-  // Real-time MAPE calculation from simulation data
+  // MAPE dihitung dari data simulasi
   const computedMape = useMemo(() => {
     if (!isAnySimulationActive) return 2.8;
     const metrics = Object.values(latestMetrics);
     if (metrics.length === 0) return 2.8;
-    // Simulate error rate based on anomaly ratio
     const anomalyRate = metrics.filter((m) => m.anomaly).length / metrics.length;
     return 2.8 + anomalyRate * 1.5;
   }, [latestMetrics, isAnySimulationActive]);
 
   const lastTrainedAgo = useMemo(() => {
-    if (!isAnySimulationActive) return "45 minutes ago";
-    // Show how recent data is
-    if (metricsHistory.length === 0) return "45 minutes ago";
+    if (!isAnySimulationActive) return "45 menit lalu";
+    if (metricsHistory.length === 0) return "45 menit lalu";
     const last = new Date(metricsHistory[metricsHistory.length - 1].timestamp);
     const diff = Math.floor((Date.now() - last.getTime()) / 1000);
-    if (diff < 5) return "Just now";
-    if (diff < 60) return `${diff}s ago`;
-    return `${Math.floor(diff / 60)}m ago`;
+    if (diff < 5) return "Baru aja";
+    if (diff < 60) return `${diff} detik lalu`;
+    return `${Math.floor(diff / 60)} menit lalu`;
   }, [metricsHistory, isAnySimulationActive, liveFlux]);
 
   const handleOverride = () => {
@@ -163,13 +154,13 @@ export default function AnalyticsPage() {
       logActivity(
         user.uid,
         "efficiency_override",
-        `Applied ${efficiencyCut}% efficiency reduction to active systems`,
+        `Override efisiensi ${efficiencyCut}% diterapkan ke sistem aktif`,
         "warning",
         { efficiencyCut }
       );
     }
     addNotification(
-      `Applied ${efficiencyCut}% reduction to active systems.`,
+      `Pengurangan ${efficiencyCut}% diterapkan ke sistem aktif.`,
       "success",
     );
   };
@@ -186,19 +177,14 @@ export default function AnalyticsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-serif font-bold italic text-text-ink mb-1">
-            Predictive Analytics
+            Analitik Prediktif
           </h1>
           <p className="text-sm text-text-muted">
-            AI/ML forecasting & automated anomaly detection
+            Prediksi AI/ML dan deteksi anomali otomatis
           </p>
         </div>
         {isAnySimulationActive && (
-          <div className="flex items-center gap-2 px-4 py-2 bg-brand-accent-teal/10 rounded-2xl border border-brand-accent-teal/20">
-            <span className="w-2 h-2 rounded-full bg-brand-accent-teal animate-pulse"></span>
-            <span className="text-xs font-bold text-brand-accent-teal">
-              {activeSimulations.length} Device{activeSimulations.length > 1 ? "s" : ""} Streaming
-            </span>
-          </div>
+          <StatusBadge label={`${activeSimulations.length} Perangkat Streaming`} variant="teal" pulse />
         )}
       </div>
 
@@ -207,12 +193,12 @@ export default function AnalyticsPage() {
           <div className="flex items-start justify-between mb-6">
             <div>
               <h2 className="text-lg font-bold text-text-ink mb-1">
-                Billing Projection
+                Proyeksi Tagihan
               </h2>
               <p className="text-sm text-text-muted">
                 {isAnySimulationActive
-                  ? "Live simulation data influencing projections"
-                  : "Projected vs actual consumption based on current trends."}
+                  ? "Data simulasi live sedang mempengaruhi proyeksi"
+                  : "Perbandingan konsumsi aktual vs prediksi berdasarkan tren saat ini."}
               </p>
             </div>
             <span className={`px-3 py-1 border text-xs font-medium rounded-full flex items-center gap-2 ${
@@ -221,14 +207,14 @@ export default function AnalyticsPage() {
                 : "bg-surface-soft border-surface-hairline text-text-body"
             }`}>
               <Activity className={`w-3 h-3 ${isAnySimulationActive ? "animate-pulse" : ""}`} />
-              {isAnySimulationActive ? "Live Feed" : "Historical"}
+              {isAnySimulationActive ? "Feed Live" : "Historis"}
             </span>
           </div>
 
           <div className="flex items-center gap-12 mb-6">
             <div>
               <p className="text-xs font-bold uppercase tracking-widest text-text-muted-soft mb-1">
-                Projected Billing
+                Proyeksi Tagihan
               </p>
               <div className="flex items-baseline gap-2 transition-all duration-300">
                 <span className="text-3xl font-serif font-bold text-text-ink">
@@ -257,7 +243,7 @@ export default function AnalyticsPage() {
             {isAnySimulationActive && (
               <div>
                 <p className="text-xs font-bold uppercase tracking-widest text-text-muted-soft mb-1">
-                  Live Power
+                  Daya Live
                 </p>
                 <div className="flex items-baseline gap-1">
                   <span className="text-xl font-serif text-brand-accent-teal font-bold">
@@ -303,7 +289,7 @@ export default function AnalyticsPage() {
                   itemStyle={{ color: "var(--color-text-on-dark)" }}
                   formatter={(value: any) => [
                     `${Number(value).toFixed(0)} kWh`,
-                    "Consumption",
+                    "Konsumsi",
                   ]}
                 />
                 <Line
@@ -330,12 +316,12 @@ export default function AnalyticsPage() {
                   animationDuration={500}
                 />
                 <ReferenceLine
-                  x="Fri"
+                  x="Jum"
                   stroke="var(--color-brand-accent-amber)"
                   strokeDasharray="3 3"
                   label={{
                     position: "top",
-                    value: "Today",
+                    value: "Hari Ini",
                     fill: "var(--color-brand-accent-amber)",
                     fontSize: 12,
                   }}
@@ -351,18 +337,18 @@ export default function AnalyticsPage() {
               <Sparkles className="w-5 h-5 text-brand-accent-amber" />
             </div>
             <h3 className="text-xl font-serif font-bold italic mb-2">
-              What-If Simulation
+              Simulasi What-If
             </h3>
             <p className="text-sm opacity-90 mb-6 leading-relaxed">
               {isAnySimulationActive
-                ? `Simulating with ${activeSimulations.length} live device(s). Slide to test efficiency cuts.`
-                : "Slide to simulate cutting active hours. Predict real-time impact on the projected billing via AI."}
+                ? `Sedang simulasi dengan ${activeSimulations.length} perangkat live. Geser buat tes potongan efisiensi.`
+                : "Geser buat simulasi pengurangan jam aktif. Prediksi dampak ke tagihan secara real-time lewat AI."}
             </p>
 
             <div className="mt-auto mb-6">
               <div className="flex justify-between text-xs font-bold uppercase tracking-widest text-text-on-dark-soft mb-2">
                 <span>0%</span>
-                <span>{efficiencyCut}% Reduction</span>
+                <span>Pengurangan {efficiencyCut}%</span>
                 <span>30%</span>
               </div>
               <input
@@ -379,27 +365,24 @@ export default function AnalyticsPage() {
               className="flex items-center justify-between w-full p-3 bg-surface-dark text-text-on-dark rounded-xl text-sm font-medium hover:bg-surface-dark-elevated transition-colors"
               onClick={handleOverride}
             >
-              <span>Execute Override</span>
+              <span>Terapkan Override</span>
               <Wrench className="w-4 h-4 text-brand-accent-teal" />
             </button>
           </div>
         </div>
       </div>
 
-      {/* Real-time Power Chart - Only when devices active */}
+      {/* Chart Daya Real-Time — hanya saat perangkat aktif */}
       {isAnySimulationActive && powerChartData.length > 3 && (
         <div className="bg-surface-card rounded-3xl p-6 border border-surface-hairline">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Zap className="w-4 h-4 text-brand-accent-teal" />
               <h3 className="text-sm font-bold uppercase tracking-widest text-text-ink">
-                Real-Time Power Draw
+                Tarikan Daya Real-Time
               </h3>
             </div>
-            <span className="flex items-center gap-1.5 text-[10px] text-brand-accent-teal font-bold uppercase tracking-widest">
-              <span className="w-1.5 h-1.5 rounded-full bg-brand-accent-teal animate-pulse"></span>
-              Streaming
-            </span>
+            <StatusBadge label="Streaming" variant="teal" pulse />
           </div>
           <div className="h-48 w-full">
             <ResponsiveContainer width="100%" height="100%">
@@ -420,7 +403,7 @@ export default function AnalyticsPage() {
                     border: "none",
                     color: "var(--color-text-on-dark)",
                   }}
-                  formatter={(value: any) => [`${Number(value).toFixed(1)} W`, "Total Power"]}
+                  formatter={(value: any) => [`${Number(value).toFixed(1)} W`, "Total Daya"]}
                 />
                 <Area
                   type="monotone"
@@ -438,36 +421,36 @@ export default function AnalyticsPage() {
 
       <div className="bg-surface-card rounded-3xl p-6 border border-surface-hairline mt-6">
         <h3 className="text-sm font-bold uppercase tracking-widest text-text-ink mb-6">
-          Model Accuracy & Training
+          Akurasi & Pelatihan Model
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <div className="p-4 bg-surface-canvas rounded-2xl border border-surface-hairline">
             <div className="text-[10px] uppercase font-bold text-text-muted-soft mb-1">
-              Algorithm
+              Algoritma
             </div>
             <div className="text-sm font-medium">Random Forest Regressor</div>
           </div>
           <div className="p-4 bg-surface-canvas rounded-2xl border border-surface-hairline">
             <div className="text-[10px] uppercase font-bold text-text-muted-soft mb-1">
-              Dataset Size
+              Ukuran Dataset
             </div>
             <div className="text-sm font-medium">
               {isAnySimulationActive
-                ? `${(12400000 + metricsHistory.length * 100).toLocaleString()} Points`
-                : "12.4M Datapoints"}
+                ? `${(12400000 + metricsHistory.length * 100).toLocaleString()} Titik Data`
+                : "12,4 Juta Titik Data"}
             </div>
           </div>
           <div className="p-4 bg-surface-canvas rounded-2xl border border-surface-hairline">
             <div className="text-[10px] uppercase font-bold text-text-muted-soft mb-1">
-              MAPE Error Rate
+              Tingkat Error MAPE
             </div>
             <div className={`text-sm font-medium ${computedMape < 3 ? "text-brand-accent-teal" : computedMape < 5 ? "text-brand-accent-amber" : "text-brand-primary"}`}>
-              {computedMape.toFixed(2)}% {computedMape < 3 ? "(Highly Accurate)" : computedMape < 5 ? "(Acceptable)" : "(Needs Review)"}
+              {computedMape.toFixed(2)}% {computedMape < 3 ? "(Sangat Akurat)" : computedMape < 5 ? "(Cukup Baik)" : "(Perlu Review)"}
             </div>
           </div>
           <div className="p-4 bg-surface-canvas rounded-2xl border border-surface-hairline">
             <div className="text-[10px] uppercase font-bold text-text-muted-soft mb-1">
-              Last Trained
+              Terakhir Dilatih
             </div>
             <div className="text-sm font-medium flex items-center gap-1">
               {lastTrainedAgo}
@@ -478,13 +461,13 @@ export default function AnalyticsPage() {
           </div>
         </div>
 
-        {/* Anomaly summary */}
+        {/* Ringkasan anomali */}
         {isAnySimulationActive && anomalyCount > 0 && (
           <div className="mt-4 p-4 bg-brand-primary/5 rounded-2xl border border-brand-primary/10 flex items-center gap-3">
             <AlertTriangle className="w-5 h-5 text-brand-primary flex-shrink-0" />
             <div>
-              <span className="text-xs font-bold text-brand-primary">{anomalyCount} anomalies detected</span>
-              <span className="text-xs text-text-muted ml-2">during this session — off-hours power spikes logged to activity feed</span>
+              <span className="text-xs font-bold text-brand-primary">{anomalyCount} anomali terdeteksi</span>
+              <span className="text-xs text-text-muted ml-2">selama sesi ini — lonjakan daya di luar jam kerja tercatat di feed aktivitas</span>
             </div>
           </div>
         )}

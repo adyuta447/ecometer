@@ -4,12 +4,9 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Calendar, Bell, Download, ChevronDown, X } from "lucide-react";
 import { useAuth } from "./AuthProvider";
 import { useSimulator } from "./SimulatorProvider";
+import { ActivityItem } from "@/components/molecules/ActivityItem";
 import {
   fetchActivities,
-  formatTimeAgo,
-  getSeverityColor,
-  getSeverityBg,
-  getActivityIcon,
   type ActivityEntry,
 } from "@/lib/activityLog";
 
@@ -27,12 +24,12 @@ export function TopBar() {
     start: null,
     end: null,
   });
-  const [dateLabel, setDateLabel] = useState("Last 30 Days");
+  const [dateLabel, setDateLabel] = useState("30 Hari Terakhir");
 
   const alertsRef = useRef<HTMLDivElement>(null);
   const dateRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdowns on outside click
+  // Tutup dropdown saat klik di luar
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (alertsRef.current && !alertsRef.current.contains(event.target as Node)) {
@@ -46,7 +43,7 @@ export function TopBar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Fetch activities whenever the notification panel is opened or date range changes
+  // Fetch aktivitas saat panel notifikasi dibuka
   const loadActivities = useCallback(async () => {
     if (!user) return;
     setLoadingActivities(true);
@@ -63,7 +60,7 @@ export function TopBar() {
     }
   }, [isAlertsOpen, loadActivities]);
 
-  // Poll for new activities every 10s to update the badge
+  // Polling aktivitas baru setiap 10 detik
   useEffect(() => {
     if (!user) return;
     const pollActivities = async () => {
@@ -78,7 +75,7 @@ export function TopBar() {
     return () => clearInterval(interval);
   }, [user, activeSimulations]);
 
-  // Quick date range presets
+  // Preset rentang tanggal
   const setPreset = (label: string, days: number) => {
     const end = new Date();
     const start = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
@@ -101,20 +98,20 @@ export function TopBar() {
     <header className="h-20 flex-shrink-0 bg-surface-canvas border-b border-surface-hairline flex items-center justify-between px-8 py-4 font-sans z-10 sticky top-0 relative">
       <div>
         <h1 className="text-xl font-serif italic text-text-ink">
-          Startup Ecosystem Jakarta 
-          <span className="text-text-muted-soft not-italic text-sm ml-2 font-sans font-normal">/ Central Office Hub</span>
+          Ekosistem Startup Jakarta
+          <span className="text-text-muted-soft not-italic text-sm ml-2 font-sans font-normal">/ Kantor Pusat</span>
         </h1>
         {isAnySimulationActive && (
           <div className="flex items-center gap-2 mt-0.5">
             <span className="w-1.5 h-1.5 rounded-full bg-brand-accent-teal animate-pulse"></span>
             <span className="text-[10px] uppercase font-bold tracking-widest text-brand-accent-teal">
-              {activeSimulations.length} Device{activeSimulations.length > 1 ? "s" : ""} Live · {(aggregatedStats.totalPower / 1000).toFixed(2)} kW
+              {activeSimulations.length} Perangkat Aktif · {(aggregatedStats.totalPower / 1000).toFixed(2)} kW
             </span>
           </div>
         )}
       </div>
       <div className="flex items-center gap-4">
-        {/* Interactive Date Range Picker */}
+        {/* Pemilih Rentang Tanggal */}
         <div className="relative" ref={dateRef}>
           <button
             onClick={() => setIsDateOpen(!isDateOpen)}
@@ -128,14 +125,14 @@ export function TopBar() {
           {isDateOpen && (
             <div className="absolute right-0 top-12 w-72 bg-surface-card border border-surface-hairline rounded-[24px] shadow-2xl p-4 z-50 animate-in slide-in-from-top-2 fade-in">
               <div className="text-[11px] font-bold uppercase tracking-widest text-text-muted-soft mb-3 px-1">
-                Quick Presets
+                Pilih Cepat
               </div>
               <div className="grid grid-cols-2 gap-2 mb-4">
                 {[
-                  { label: "Today", days: 1 },
-                  { label: "Last 7 Days", days: 7 },
-                  { label: "Last 30 Days", days: 30 },
-                  { label: "Last 90 Days", days: 90 },
+                  { label: "Hari Ini", days: 1 },
+                  { label: "7 Hari Terakhir", days: 7 },
+                  { label: "30 Hari Terakhir", days: 30 },
+                  { label: "90 Hari Terakhir", days: 90 },
                 ].map((preset) => (
                   <button
                     key={preset.label}
@@ -153,11 +150,11 @@ export function TopBar() {
 
               <div className="border-t border-surface-hairline pt-3">
                 <div className="text-[11px] font-bold uppercase tracking-widest text-text-muted-soft mb-2 px-1">
-                  Custom Range
+                  Rentang Kustom
                 </div>
                 <div className="space-y-2">
                   <div>
-                    <label className="text-[10px] text-text-muted-soft block mb-1 px-1">From</label>
+                    <label className="text-[10px] text-text-muted-soft block mb-1 px-1">Dari</label>
                     <input
                       type="date"
                       onChange={(e) => handleCustomDate("start", e.target.value)}
@@ -165,7 +162,7 @@ export function TopBar() {
                     />
                   </div>
                   <div>
-                    <label className="text-[10px] text-text-muted-soft block mb-1 px-1">To</label>
+                    <label className="text-[10px] text-text-muted-soft block mb-1 px-1">Sampai</label>
                     <input
                       type="date"
                       onChange={(e) => handleCustomDate("end", e.target.value)}
@@ -180,7 +177,7 @@ export function TopBar() {
 
         <div className="h-6 w-px bg-surface-hairline mx-2 hidden md:block"></div>
 
-        {/* Notifications Bell - Real Activities */}
+        {/* Notifikasi — Feed Aktivitas */}
         <div className="relative" ref={alertsRef}>
           <button 
             onClick={() => {
@@ -201,7 +198,7 @@ export function TopBar() {
             <div className="absolute right-0 top-12 w-96 bg-surface-card border border-surface-hairline rounded-[24px] shadow-2xl overflow-hidden animate-in slide-in-from-top-2 fade-in z-50">
               <div className="flex justify-between items-center p-4 border-b border-surface-hairline bg-surface-soft">
                 <span className="text-[11px] font-bold uppercase tracking-widest text-text-muted">
-                  Activity Feed
+                  Riwayat Aktivitas
                 </span>
                 <div className="flex items-center gap-2">
                   {isAnySimulationActive && (
@@ -223,40 +220,18 @@ export function TopBar() {
                 {loadingActivities ? (
                   <div className="p-6 text-center">
                     <div className="w-5 h-5 border-2 border-brand-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
-                    <p className="text-xs text-text-muted mt-2">Loading activities...</p>
+                    <p className="text-xs text-text-muted mt-2">Memuat aktivitas...</p>
                   </div>
                 ) : activities.length === 0 ? (
                   <div className="p-6 text-center">
                     <Bell className="w-8 h-8 text-surface-hairline mx-auto mb-2" />
-                    <p className="text-sm text-text-muted">No recent activities</p>
-                    <p className="text-xs text-text-muted-soft mt-1">Enable Device Simulation to generate events</p>
+                    <p className="text-sm text-text-muted">Belum ada aktivitas</p>
+                    <p className="text-xs text-text-muted-soft mt-1">Nyalakan simulasi perangkat buat mulai tracking</p>
                   </div>
                 ) : (
                   <div className="divide-y divide-surface-hairline">
                     {activities.map((activity) => (
-                      <div
-                        key={activity.id}
-                        className="p-3 hover:bg-surface-soft/50 transition-colors"
-                      >
-                        <div className="flex items-start gap-3">
-                          <div className={`w-8 h-8 rounded-xl ${getSeverityBg(activity.severity)} flex items-center justify-center flex-shrink-0 text-sm mt-0.5`}>
-                            {getActivityIcon(activity.type)}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-start justify-between gap-2">
-                              <span className={`text-[10px] font-bold uppercase tracking-widest ${getSeverityColor(activity.severity)}`}>
-                                {activity.type.replace(/_/g, " ")}
-                              </span>
-                              <span className="text-[10px] text-text-muted-soft flex-shrink-0">
-                                {formatTimeAgo(activity.timestamp)}
-                              </span>
-                            </div>
-                            <p className="text-xs text-text-body mt-0.5 leading-relaxed">
-                              {activity.message}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
+                      <ActivityItem key={activity.id} activity={activity} />
                     ))}
                   </div>
                 )}
@@ -268,7 +243,7 @@ export function TopBar() {
                     onClick={loadActivities}
                     className="w-full text-center text-xs text-brand-primary font-medium hover:text-brand-primary-active transition-colors"
                   >
-                    Refresh Activity Feed
+                    Muat Ulang Aktivitas
                   </button>
                 </div>
               )}
@@ -278,7 +253,7 @@ export function TopBar() {
 
         <button className="px-5 py-2.5 bg-text-ink hover:bg-brand-primary text-text-on-dark rounded-2xl text-xs font-bold tracking-wide transition-colors flex items-center gap-2">
           <Download className="w-4 h-4" />
-          <span className="hidden sm:inline">EXPORT</span>
+          <span className="hidden sm:inline">EKSPOR</span>
         </button>
       </div>
     </header>

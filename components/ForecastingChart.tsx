@@ -5,7 +5,8 @@ import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/components/AuthProvider";
 import { useSimulator } from "@/components/SimulatorProvider";
-import { Loader2, TrendingDown, TrendingUp } from "lucide-react";
+import { StatusBadge } from "@/components/atoms/StatusBadge";
+import { Loader2, TrendingDown } from "lucide-react";
 
 export function ForecastingChart() {
   const { user } = useAuth();
@@ -34,10 +35,10 @@ export function ForecastingChart() {
     fetchSettings();
   }, [user]);
 
-  // Calculate projected OpEx based on real-time simulation data
-  const baseProjectedKwh = 33200; // base monthly projection in kWh
+  // Hitung proyeksi OpEx berdasarkan data simulasi real-time
+  const baseProjectedKwh = 33200;
   const liveExtrapolatedMonthlyKwh = isAnySimulationActive
-    ? aggregatedStats.totalUsageKwh * (30 * 24 * 3600 / 2) // Extrapolate from 2s intervals to monthly
+    ? aggregatedStats.totalUsageKwh * (30 * 24 * 3600 / 2)
     : 0;
   
   const projectedOpEx = isAnySimulationActive
@@ -48,38 +49,30 @@ export function ForecastingChart() {
   const savings = Math.max(0, budget - projectedOpEx);
   const savingsPercent = ((savings / budget) * 100).toFixed(1);
 
-  // CO2e target calculation from live data
+  // Kalkulasi target CO2e dari data live
   const liveCo2eMonthly = isAnySimulationActive
-    ? aggregatedStats.totalCo2e * (30 * 24 * 3600 / 2) / 1000 // Convert to tons
+    ? aggregatedStats.totalCo2e * (30 * 24 * 3600 / 2) / 1000
     : 4.2;
 
   if (loading) return <div className="col-span-12 md:col-span-8 bg-brand-primary rounded-[32px] p-8 flex justify-center items-center"><Loader2 className="w-8 h-8 animate-spin text-text-on-dark" /></div>;
 
   return (
     <section className="col-span-12 md:col-span-8 bg-brand-primary rounded-[32px] p-8 text-text-on-dark flex flex-col justify-between relative overflow-hidden">
-      {/* Subtle animated background */}
-      {isAnySimulationActive && (
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-white rounded-full blur-[80px] animate-pulse" />
-          <div className="absolute bottom-0 left-0 w-48 h-48 bg-brand-accent-teal rounded-full blur-[60px] animate-pulse" style={{ animationDelay: "1s" }} />
-        </div>
-      )}
-
       <div className="relative z-10">
         <div className="flex items-center gap-2 mb-1">
-          <span className="text-sm font-medium opacity-80">AI/ML Financial Forecast</span>
+          <span className="text-sm font-medium opacity-80">Prediksi Keuangan AI/ML</span>
           {isAnySimulationActive && (
             <span className="px-2 py-0.5 bg-white/20 text-[10px] font-bold uppercase tracking-widest rounded-md flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-brand-accent-teal animate-pulse"></span>
-              Live Data
+              Data Live
             </span>
           )}
         </div>
         <h2 className="text-5xl font-serif italic mb-6 text-text-on-dark leading-tight">
-          Saving Rp {savings.toLocaleString('id-ID', { maximumFractionDigits: 0 })}
+          Hemat Rp {savings.toLocaleString('id-ID', { maximumFractionDigits: 0 })}
           {isAnySimulationActive && (
             <span className="text-lg font-sans not-italic ml-3 opacity-70">
-              ({savingsPercent}% of budget)
+              ({savingsPercent}% dari anggaran)
             </span>
           )}
         </h2>
@@ -87,12 +80,12 @@ export function ForecastingChart() {
       <div className="flex items-end justify-between relative z-10">
         <div className="flex gap-8">
           <div>
-            <div className="text-[11px] uppercase tracking-widest opacity-60">Utility Baseline (Budget)</div>
+            <div className="text-[11px] uppercase tracking-widest opacity-60">Baseline Anggaran</div>
             <div className="text-lg font-serif">Rp {(budget / 1000000).toFixed(1)}M</div>
           </div>
           <div>
             <div className="text-[11px] uppercase tracking-widest opacity-60 flex items-center gap-1">
-              Projected OpEx
+              Proyeksi OpEx
               {isAnySimulationActive && <TrendingDown className="w-3 h-3 text-brand-accent-teal" />}
             </div>
             <div className="text-lg font-serif">
@@ -101,21 +94,21 @@ export function ForecastingChart() {
           </div>
         </div>
         <div className="text-right">
-          <div className="text-[11px] uppercase tracking-widest opacity-60">CO2e Target</div>
+          <div className="text-[11px] uppercase tracking-widest opacity-60">Target CO2e</div>
           <div className="text-2xl font-serif tracking-tight">
-            -{liveCo2eMonthly.toFixed(1)} tons eCO₂
+            -{liveCo2eMonthly.toFixed(1)} ton eCO₂
           </div>
         </div>
       </div>
 
-      {/* Live device count indicator */}
+      {/* Indikator jumlah perangkat live */}
       {isAnySimulationActive && (
         <div className="mt-4 pt-4 border-t border-white/10 relative z-10 flex items-center justify-between">
           <span className="text-[10px] uppercase tracking-widest opacity-50">
-            Based on {activeSimulations.length} active device{activeSimulations.length > 1 ? "s" : ""} telemetry
+            Berdasarkan {activeSimulations.length} telemetri perangkat aktif
           </span>
           <span className="text-[10px] uppercase tracking-widest text-brand-accent-teal font-bold">
-            {(aggregatedStats.totalPower / 1000).toFixed(2)} kW draw
+            {(aggregatedStats.totalPower / 1000).toFixed(2)} kW tarikan daya
           </span>
         </div>
       )}

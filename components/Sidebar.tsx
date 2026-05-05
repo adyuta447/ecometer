@@ -25,12 +25,12 @@ export function Sidebar() {
 
   const handleLogout = async () => {
     if (user) {
-      await logActivity(user.uid, "logout", "User logged out", "info");
+      await logActivity(user.uid, "logout", "Pengguna keluar dari sistem", "info");
     }
     await signOut(auth);
   };
 
-  // Compute aggregation score from live data
+  // Skor agregasi dihitung dari data simulasi real-time
   const aggregationScore = isAnySimulationActive
     ? Math.max(85, 100 - anomalyCount * 0.5 - (aggregatedStats.totalPower > 5000 ? 2 : 0)).toFixed(1)
     : "97.5";
@@ -47,35 +47,35 @@ export function Sidebar() {
         
         <Link href="/" className={getLinkClasses("/")}>
           <LayoutDashboard className="w-4 h-4 ml-0.5" />
-          <span>Overview</span>
+          <span>Ringkasan</span>
         </Link>
         <Link href="/analytics" className={getLinkClasses("/analytics")}>
           <Activity className="w-4 h-4 ml-0.5" />
-          <span>Analytics & AI</span>
+          <span>Analitik & AI</span>
         </Link>
         <Link href="/groups" className={getLinkClasses("/groups")}>
           <Box className="w-4 h-4 ml-0.5" />
-          <span>Virtual Groups</span>
+          <span>Grup Virtual</span>
         </Link>
         <Link href="/reports" className={getLinkClasses("/reports")}>
           <FileText className="w-4 h-4 ml-0.5" />
-          <span>SRUK Audit</span>
+          <span>Audit SRUK</span>
         </Link>
         <Link href="/leaderboard" className={getLinkClasses("/leaderboard")}>
           <Trophy className="w-4 h-4 ml-0.5" />
-          <span>Leaderboard</span>
+          <span>Papan Peringkat</span>
         </Link>
         <Link href="/integrations" className={getLinkClasses("/integrations")}>
           <Plug className="w-4 h-4 ml-0.5" />
-          <span>ERP Integration</span>
+          <span>Integrasi ERP</span>
         </Link>
 
         <div className="mt-8 mb-4">
-          <div className="text-[11px] font-bold uppercase tracking-widest text-text-muted-soft mb-4">System</div>
+          <div className="text-[11px] font-bold uppercase tracking-widest text-text-muted-soft mb-4">Sistem</div>
           <Link href="/devices" className={getLinkClasses("/devices")}>
             <Router className="w-4 h-4 ml-0.5" />
             <span className="flex items-center gap-2">
-              IoT Devices
+              Perangkat IoT
               {isAnySimulationActive && (
                 <span className="w-1.5 h-1.5 rounded-full bg-brand-accent-teal animate-pulse"></span>
               )}
@@ -83,7 +83,7 @@ export function Sidebar() {
           </Link>
           <Link href="/settings/billing" className={getLinkClasses("/settings/billing")}>
             <Settings className="w-4 h-4 ml-0.5" />
-            <span>Settings</span>
+            <span>Pengaturan</span>
           </Link>
         </div>
       </nav>
@@ -91,9 +91,9 @@ export function Sidebar() {
       <div className="mt-auto">
         <div className="p-4 bg-surface-dark rounded-2xl text-text-on-dark shadow-sm mb-4">
           <div className="text-[10px] text-text-on-dark-soft mb-1 uppercase tracking-widest font-bold">
-            Aggregation Score
+            Skor Agregasi
             {isAnySimulationActive && (
-              <span className="ml-1 text-brand-accent-teal">• Live</span>
+              <span className="ml-1 text-brand-accent-teal">· Live</span>
             )}
           </div>
           <div className="text-2xl font-serif">{aggregationScore}%</div>
@@ -105,14 +105,14 @@ export function Sidebar() {
           </div>
           {isAnySimulationActive && (
             <div className="text-[9px] text-text-on-dark-soft mt-1.5">
-              {activeSimulations.length} device(s) · {(aggregatedStats.totalPower / 1000).toFixed(2)} kW
+              {activeSimulations.length} perangkat · {(aggregatedStats.totalPower / 1000).toFixed(2)} kW
             </div>
           )}
         </div>
 
         <button onClick={handleLogout} className="flex items-center gap-3 w-full p-2 text-text-muted hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-colors text-sm font-medium">
           <LogOut className="w-4 h-4 ml-0.5" />
-          <span>Log out</span>
+          <span>Keluar</span>
         </button>
       </div>
     </aside>

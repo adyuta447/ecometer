@@ -30,23 +30,20 @@ export function Leaderboard() {
     fetchGroups();
   }, [user]);
 
-  // Compute real-time efficiency per group based on their device simulations
+  // Hitung efisiensi real-time per grup dari simulasi perangkat
   const rankedGroups = useMemo(() => {
     return groups.map((g, index) => {
       const groupDeviceIds = g.deviceIds || [];
       const activeInGroup = groupDeviceIds.filter((id: string) => activeSimulations.includes(id));
 
-      // If group has active devices, compute efficiency from their metrics
       let efficiency: number;
       if (isAnySimulationActive && activeInGroup.length > 0) {
         const totalPower = activeInGroup.reduce((acc: number, id: string) => {
           return acc + (latestMetrics[id]?.power || 0);
         }, 0);
         const anomalyCount = activeInGroup.filter((id: string) => latestMetrics[id]?.anomaly).length;
-        // Higher power draw = less efficient, anomalies reduce efficiency further
         efficiency = 20 - (totalPower / 500) - (anomalyCount * 5);
       } else {
-        // Fallback to baseline
         efficiency = 18 - (index * 4);
       }
 
@@ -61,19 +58,19 @@ export function Leaderboard() {
   return (
     <div className="bg-surface-dark rounded-[24px] p-5 text-text-on-dark h-full font-sans">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-sm font-bold uppercase tracking-tighter text-brand-primary">Eco-Leaderboard</h3>
+        <h3 className="text-sm font-bold uppercase tracking-tighter text-brand-primary">Papan Peringkat</h3>
         <span className="text-[10px] text-text-on-dark-soft flex items-center gap-1.5">
           {isAnySimulationActive && (
             <span className="w-1.5 h-1.5 rounded-full bg-brand-accent-teal animate-pulse"></span>
           )}
-          {isAnySimulationActive ? "Live Ranking" : "Top Performers"}
+          {isAnySimulationActive ? "Peringkat Live" : "Performa Terbaik"}
         </span>
       </div>
       {loading ? (
          <div className="flex justify-center p-4"><Loader2 className="w-4 h-4 animate-spin text-brand-primary" /></div>
       ) : (
         <div className="space-y-3">
-          {rankedGroups.length === 0 && <p className="text-xs text-text-on-dark-soft">No groups data available.</p>}
+          {rankedGroups.length === 0 && <p className="text-xs text-text-on-dark-soft">Belum ada data grup.</p>}
           {rankedGroups.map((g, index) => {
              const isPositive = g.efficiency >= 0;
              return (
@@ -88,7 +85,7 @@ export function Leaderboard() {
                   </div>
                 </div>
                 <span className={`text-[10px] font-bold ${isPositive ? 'text-brand-accent-teal' : 'text-brand-primary'}`}>
-                   {isPositive ? '+' : ''}{g.efficiency}% Efficiency
+                   {isPositive ? '+' : ''}{g.efficiency}% Efisiensi
                 </span>
               </div>
              );

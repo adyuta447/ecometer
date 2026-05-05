@@ -33,7 +33,7 @@ export function DeviceGroups() {
   return (
     <>
       {groups.length === 0 && (
-         <div className="col-span-2 flex justify-center py-4 text-sm text-text-muted">No groups data available.</div>
+         <div className="col-span-2 flex justify-center py-4 text-sm text-text-muted">Belum ada data grup.</div>
       )}
       {groups.map((group) => (
         <div key={group.id} className="bg-surface-soft rounded-[24px] p-5">
@@ -45,7 +45,7 @@ export function DeviceGroups() {
             <div className="bg-brand-primary h-full" style={{ width: group.capacityPercentage }}></div>
           </div>
           <div className="flex justify-between text-[10px] text-text-muted-soft">
-            <span>{group.capacityPercentage} Capacity</span>
+            <span>{group.capacityPercentage} Kapasitas</span>
             <span>{group.co2}</span>
           </div>
         </div>

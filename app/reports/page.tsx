@@ -136,7 +136,7 @@ export default function ReportsPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-surface-card rounded-[24px] p-6 border border-surface-hairline flex flex-col justify-between min-h-[140px]">
+        <div className="bg-surface-card rounded-2xl p-6 border border-surface-hairline flex flex-col justify-between min-h-[140px]">
           <div>
             <p className="text-[10px] uppercase font-bold text-text-muted-soft mb-2 tracking-widest">Total Pemakaian Energi</p>
             <h3 className="text-3xl font-serif font-bold text-text-ink">{totalEnergyMwh.toFixed(1)} MWh</h3>
@@ -145,7 +145,7 @@ export default function ReportsPage() {
             <StatusBadge label={`+${(liveSessionKwh / 1000).toFixed(4)} MWh (Sesi Live)`} variant="teal" pulse />
           )}
         </div>
-        <div className="bg-surface-card rounded-[24px] p-6 border border-surface-hairline flex flex-col justify-between min-h-[140px]">
+        <div className="bg-surface-card rounded-2xl p-6 border border-surface-hairline flex flex-col justify-between min-h-[140px]">
           <div>
             <p className="text-[10px] uppercase font-bold text-text-muted-soft mb-2 tracking-widest">Emisi Terhitung</p>
             <h3 className="text-3xl font-serif font-bold text-text-ink">{totalEmissions} mt</h3>
@@ -154,7 +154,7 @@ export default function ReportsPage() {
             <StatusBadge label={`Faktor CO₂e: ${co2Factor} kgCO2e/kWh`} variant="amber" pulse />
           )}
         </div>
-        <div className="bg-surface-dark rounded-[24px] p-6 text-text-on-dark flex flex-col justify-between min-h-[140px] shadow-lg">
+        <div className="bg-surface-dark rounded-2xl p-6 text-text-on-dark flex flex-col justify-between min-h-[140px]">
           <div className="flex items-center gap-2 mb-2">
             <validationStatus.icon className={`w-4 h-4 ${validationStatus.color}`} />
             <p className={`text-[10px] uppercase font-bold ${validationStatus.color} tracking-widest`}>
@@ -170,7 +170,7 @@ export default function ReportsPage() {
         </div>
       </div>
 
-      <div className="bg-surface-canvas border border-surface-hairline rounded-[32px] overflow-hidden">
+      <div className="bg-surface-canvas border border-surface-hairline rounded-2xl overflow-hidden">
         <div className="p-6 border-b border-surface-hairline bg-surface-soft flex justify-between items-center">
           <div className="flex items-center gap-3">
             <FileSpreadsheet className="w-5 h-5 text-text-muted-soft" />
@@ -225,11 +225,9 @@ export default function ReportsPage() {
 
       {/* Ringkasan Sesi Live */}
       {isAnySimulationActive && (
-        <div className="bg-surface-dark rounded-[24px] p-6 text-text-on-dark">
+        <div className="bg-surface-dark rounded-2xl p-6 text-text-on-dark">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-xl bg-brand-accent-teal/20 flex items-center justify-center">
-              <Factory className="w-5 h-5 text-brand-accent-teal" />
-            </div>
+            <Factory className="w-5 h-5 text-brand-accent-teal" />
             <div>
               <h3 className="text-sm font-bold uppercase tracking-widest">Sesi Audit Live</h3>
               <p className="text-[10px] text-text-on-dark-soft mt-0.5">

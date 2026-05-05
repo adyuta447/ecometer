@@ -36,7 +36,7 @@ export function DeviceGroups() {
          <div className="col-span-2 flex justify-center py-4 text-sm text-text-muted">Belum ada data grup.</div>
       )}
       {groups.map((group) => (
-        <div key={group.id} className="bg-surface-soft rounded-[24px] p-5">
+        <div key={group.id} className="bg-surface-soft rounded-2xl p-5">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-sm font-bold uppercase tracking-tighter text-text-ink">{group.name}</h3>
             <span className="text-xs text-brand-accent-teal font-medium tracking-tight">{group.usage}</span>

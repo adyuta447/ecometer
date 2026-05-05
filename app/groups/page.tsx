@@ -202,7 +202,7 @@ export default function GroupsPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {/* Panel kiri: Daftar Segmen */}
-        <div className="col-span-1 bg-surface-card rounded-3xl p-5 border border-surface-hairline">
+        <div className="col-span-1 bg-surface-card rounded-2xl p-5 border border-surface-hairline">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-[11px] font-bold uppercase tracking-widest text-text-muted-soft">
               Segmen
@@ -259,11 +259,9 @@ export default function GroupsPage() {
         <div className="col-span-3 space-y-6">
           {activeSegment ? (
             <>
-              <div className="bg-surface-card rounded-3xl p-6 border border-surface-hairline flex items-center justify-between">
+              <div className="bg-surface-card rounded-2xl p-6 border border-surface-hairline flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-surface-soft rounded-2xl flex items-center justify-center border border-surface-hairline">
-                    <Shield className="w-6 h-6 text-brand-accent-teal" />
-                  </div>
+                  <Shield className="w-6 h-6 text-brand-accent-teal" />
                   <div>
                     <div className="flex items-center gap-2 mb-1">
                       <h2 className="text-xl font-bold text-text-ink">
@@ -350,7 +348,7 @@ export default function GroupsPage() {
 
               {/* Perangkat yang Ditugaskan */}
               {activeSegment.deviceIds?.length > 0 && (
-                <div className="bg-surface-card rounded-3xl p-5 border border-surface-hairline">
+                <div className="bg-surface-card rounded-2xl p-5 border border-surface-hairline">
                   <h3 className="text-[11px] font-bold uppercase tracking-widest text-text-muted-soft mb-4">
                     Perangkat di Grup Ini
                   </h3>
@@ -399,7 +397,7 @@ export default function GroupsPage() {
               )}
 
               {/* Visualisasi kapasitas */}
-              <div className="bg-surface-soft rounded-[24px] p-5">
+              <div className="bg-surface-soft rounded-2xl p-5">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-sm font-bold uppercase tracking-tighter text-text-ink">
                     {activeSegment.name}
@@ -423,7 +421,7 @@ export default function GroupsPage() {
               </div>
             </>
           ) : (
-            <div className="bg-surface-card rounded-3xl p-12 border border-surface-hairline text-center flex flex-col items-center justify-center min-h-[300px]">
+            <div className="bg-surface-card rounded-2xl p-12 border border-surface-hairline text-center flex flex-col items-center justify-center min-h-[300px]">
               <Shield className="w-12 h-12 text-surface-hairline mb-4" />
               <p className="text-text-muted">
                 Pilih atau buat grup virtual buat lihat data telemetrinya.
@@ -436,7 +434,7 @@ export default function GroupsPage() {
       {/* Modal Buat Grup */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-surface-dark/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-surface-dark-elevated border border-surface-hairline/20 rounded-[32px] p-8 w-full max-w-lg text-text-on-dark shadow-2xl max-h-[90vh] overflow-y-auto">
+          <div className="bg-surface-dark-elevated border border-surface-hairline/20 rounded-2xl p-8 w-full max-w-lg text-text-on-dark max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-serif font-bold italic">
                 Buat Grup Virtual

@@ -18,7 +18,6 @@ export function TopBar() {
   const [loadingActivities, setLoadingActivities] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
 
-  // Date picker state
   const [isDateOpen, setIsDateOpen] = useState(false);
   const [dateRange, setDateRange] = useState<{ start: Date | null; end: Date | null }>({
     start: null,
@@ -29,7 +28,6 @@ export function TopBar() {
   const alertsRef = useRef<HTMLDivElement>(null);
   const dateRef = useRef<HTMLDivElement>(null);
 
-  // Tutup dropdown saat klik di luar
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (alertsRef.current && !alertsRef.current.contains(event.target as Node)) {
@@ -43,7 +41,6 @@ export function TopBar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Fetch aktivitas saat panel notifikasi dibuka
   const loadActivities = useCallback(async () => {
     if (!user) return;
     setLoadingActivities(true);
@@ -60,7 +57,6 @@ export function TopBar() {
     }
   }, [isAlertsOpen, loadActivities]);
 
-  // Polling aktivitas baru setiap 10 detik
   useEffect(() => {
     if (!user) return;
     const pollActivities = async () => {
@@ -75,7 +71,6 @@ export function TopBar() {
     return () => clearInterval(interval);
   }, [user, activeSimulations]);
 
-  // Preset rentang tanggal
   const setPreset = (label: string, days: number) => {
     const end = new Date();
     const start = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
@@ -111,7 +106,6 @@ export function TopBar() {
         )}
       </div>
       <div className="flex items-center gap-4">
-        {/* Pemilih Rentang Tanggal */}
         <div className="relative" ref={dateRef}>
           <button
             onClick={() => setIsDateOpen(!isDateOpen)}
@@ -123,7 +117,7 @@ export function TopBar() {
           </button>
 
           {isDateOpen && (
-            <div className="absolute right-0 top-12 w-72 bg-surface-card border border-surface-hairline rounded-[24px] shadow-2xl p-4 z-50 animate-in slide-in-from-top-2 fade-in">
+            <div className="absolute right-0 top-12 w-72 bg-surface-card border border-surface-hairline rounded-2xl p-4 z-50">
               <div className="text-[11px] font-bold uppercase tracking-widest text-text-muted-soft mb-3 px-1">
                 Pilih Cepat
               </div>
@@ -177,14 +171,13 @@ export function TopBar() {
 
         <div className="h-6 w-px bg-surface-hairline mx-2 hidden md:block"></div>
 
-        {/* Notifikasi — Feed Aktivitas */}
         <div className="relative" ref={alertsRef}>
           <button 
             onClick={() => {
               setIsAlertsOpen(!isAlertsOpen);
               if (!isAlertsOpen) setUnreadCount(0);
             }}
-            className="p-2 border border-surface-hairline rounded-xl hover:bg-surface-soft transition-colors relative"
+            className="p-2 border border-surface-hairline rounded-2xl hover:bg-surface-soft transition-colors relative"
           >
             <Bell className="w-5 h-5 text-text-ink" />
             {unreadCount > 0 && (
@@ -195,7 +188,7 @@ export function TopBar() {
           </button>
           
           {isAlertsOpen && (
-            <div className="absolute right-0 top-12 w-96 bg-surface-card border border-surface-hairline rounded-[24px] shadow-2xl overflow-hidden animate-in slide-in-from-top-2 fade-in z-50">
+            <div className="absolute right-0 top-12 w-96 bg-surface-card border border-surface-hairline rounded-2xl overflow-hidden z-50">
               <div className="flex justify-between items-center p-4 border-b border-surface-hairline bg-surface-soft">
                 <span className="text-[11px] font-bold uppercase tracking-widest text-text-muted">
                   Riwayat Aktivitas
@@ -224,7 +217,7 @@ export function TopBar() {
                   </div>
                 ) : activities.length === 0 ? (
                   <div className="p-6 text-center">
-                    <Bell className="w-8 h-8 text-surface-hairline mx-auto mb-2" />
+                    <Bell className="w-6 h-6 text-text-muted-soft mx-auto mb-2" />
                     <p className="text-sm text-text-muted">Belum ada aktivitas</p>
                     <p className="text-xs text-text-muted-soft mt-1">Nyalakan simulasi perangkat buat mulai tracking</p>
                   </div>

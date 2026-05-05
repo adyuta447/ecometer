@@ -147,7 +147,7 @@ export default function DevicesPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-surface-card rounded-[24px] p-5 border border-surface-hairline">
+        <div className="bg-surface-card rounded-2xl p-5 border border-surface-hairline">
           <div className="flex justify-between items-center mb-2">
             <span className="text-[10px] uppercase font-bold text-text-muted-soft tracking-widest">
               Sensor Aktif
@@ -162,7 +162,7 @@ export default function DevicesPage() {
             }
           </div>
         </div>
-        <div className="bg-surface-card rounded-[24px] p-5 border border-surface-hairline border-brand-primary/30">
+        <div className="bg-surface-card rounded-2xl p-5 border border-surface-hairline border-brand-primary/30">
           <div className="flex justify-between items-center mb-2">
             <span className="text-[10px] uppercase font-bold text-brand-primary tracking-widest">
               Sistem Offline
@@ -173,7 +173,7 @@ export default function DevicesPage() {
             {devices.filter((d) => d.status === "offline" && !activeSimulations.includes(d.id)).length}
           </div>
         </div>
-        <div className="bg-surface-card rounded-[24px] p-5 border border-surface-hairline md:col-span-2">
+        <div className="bg-surface-card rounded-2xl p-5 border border-surface-hairline md:col-span-2">
           <div className="flex justify-between items-center mb-2">
             <span className="text-[10px] uppercase font-bold text-text-muted-soft tracking-widest">
               Akurasi MAPE Global
@@ -188,7 +188,7 @@ export default function DevicesPage() {
         </div>
       </div>
 
-      <div className="bg-surface-canvas border border-surface-hairline rounded-[32px] overflow-hidden">
+      <div className="bg-surface-canvas border border-surface-hairline rounded-2xl overflow-hidden">
         <table className="w-full text-left text-sm">
           <thead className="bg-surface-soft text-[11px] uppercase tracking-widest text-text-muted-soft">
             <tr>
@@ -326,7 +326,7 @@ export default function DevicesPage() {
 
       {isModalOpen && (
         <div className="fixed inset-0 bg-surface-dark/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-surface-dark-elevated border border-surface-hairline/20 rounded-[32px] p-8 w-full max-w-md text-text-on-dark shadow-2xl">
+          <div className="bg-surface-dark-elevated border border-surface-hairline/20 rounded-2xl p-8 w-full max-w-md text-text-on-dark">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-serif font-bold italic">
                 Daftarkan Sensor

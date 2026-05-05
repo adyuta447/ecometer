@@ -35,7 +35,6 @@ export function ForecastingChart() {
     fetchSettings();
   }, [user]);
 
-  // Hitung proyeksi OpEx berdasarkan data simulasi real-time
   const baseProjectedKwh = 33200;
   const liveExtrapolatedMonthlyKwh = isAnySimulationActive
     ? aggregatedStats.totalUsageKwh * (30 * 24 * 3600 / 2)
@@ -49,15 +48,14 @@ export function ForecastingChart() {
   const savings = Math.max(0, budget - projectedOpEx);
   const savingsPercent = ((savings / budget) * 100).toFixed(1);
 
-  // Kalkulasi target CO2e dari data live
   const liveCo2eMonthly = isAnySimulationActive
     ? aggregatedStats.totalCo2e * (30 * 24 * 3600 / 2) / 1000
     : 4.2;
 
-  if (loading) return <div className="col-span-12 md:col-span-8 bg-brand-primary rounded-[32px] p-8 flex justify-center items-center"><Loader2 className="w-8 h-8 animate-spin text-text-on-dark" /></div>;
+  if (loading) return <div className="col-span-12 md:col-span-8 bg-brand-primary rounded-2xl p-8 flex justify-center items-center"><Loader2 className="w-8 h-8 animate-spin text-text-on-dark" /></div>;
 
   return (
-    <section className="col-span-12 md:col-span-8 bg-brand-primary rounded-[32px] p-8 text-text-on-dark flex flex-col justify-between relative overflow-hidden">
+    <section className="col-span-12 md:col-span-8 bg-brand-primary rounded-2xl p-8 text-text-on-dark flex flex-col justify-between relative overflow-hidden">
       <div className="relative z-10">
         <div className="flex items-center gap-2 mb-1">
           <span className="text-sm font-medium opacity-80">Prediksi Keuangan AI/ML</span>
@@ -88,20 +86,15 @@ export function ForecastingChart() {
               Proyeksi OpEx
               {isAnySimulationActive && <TrendingDown className="w-3 h-3 text-brand-accent-teal" />}
             </div>
-            <div className="text-lg font-serif">
-              Rp {projectedOpExFormatted}M
-            </div>
+            <div className="text-lg font-serif">Rp {projectedOpExFormatted}M</div>
           </div>
         </div>
         <div className="text-right">
           <div className="text-[11px] uppercase tracking-widest opacity-60">Target CO2e</div>
-          <div className="text-2xl font-serif tracking-tight">
-            -{liveCo2eMonthly.toFixed(1)} ton eCO₂
-          </div>
+          <div className="text-2xl font-serif tracking-tight">-{liveCo2eMonthly.toFixed(1)} ton eCO₂</div>
         </div>
       </div>
 
-      {/* Indikator jumlah perangkat live */}
       {isAnySimulationActive && (
         <div className="mt-4 pt-4 border-t border-white/10 relative z-10 flex items-center justify-between">
           <span className="text-[10px] uppercase tracking-widest opacity-50">

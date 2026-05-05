@@ -30,7 +30,6 @@ export function Leaderboard() {
     fetchGroups();
   }, [user]);
 
-  // Hitung efisiensi real-time per grup dari simulasi perangkat
   const rankedGroups = useMemo(() => {
     return groups.map((g, index) => {
       const groupDeviceIds = g.deviceIds || [];
@@ -56,7 +55,7 @@ export function Leaderboard() {
   }, [groups, isAnySimulationActive, latestMetrics, activeSimulations]);
 
   return (
-    <div className="bg-surface-dark rounded-[24px] p-5 text-text-on-dark h-full font-sans">
+    <div className="bg-surface-dark rounded-2xl p-5 text-text-on-dark h-full font-sans">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-sm font-bold uppercase tracking-tighter text-brand-primary">Papan Peringkat</h3>
         <span className="text-[10px] text-text-on-dark-soft flex items-center gap-1.5">

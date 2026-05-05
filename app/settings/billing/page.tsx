@@ -122,7 +122,7 @@ export default function BillingSettingsPage() {
         </p>
       </div>
 
-      <div className="bg-surface-card border border-surface-hairline rounded-[32px] p-8">
+      <div className="bg-surface-card border border-surface-hairline rounded-2xl p-8">
         <form onSubmit={handleSave} className="space-y-6">
           <div className="p-5 bg-surface-canvas rounded-2xl border border-surface-hairline space-y-4">
             <h3 className="font-bold text-text-ink text-sm uppercase tracking-tight flex items-center gap-2 border-b border-surface-hairline pb-4">

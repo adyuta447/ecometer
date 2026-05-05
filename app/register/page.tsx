@@ -62,7 +62,7 @@ export default function RegisterPage() {
     <div className="min-h-screen flex items-center justify-center p-4 relative">
       <div className="absolute inset-0 bg-surface-canvas"></div>
 
-      <div className="w-full max-w-md bg-surface-dark-elevated border border-surface-hairline/20 rounded-[32px] p-8 shadow-2xl relative z-10 text-white">
+      <div className="w-full max-w-md bg-surface-dark-elevated border border-surface-hairline/20 rounded-2xl p-8 relative z-10 text-white">
         <div className="mb-8">
           <h1 className="text-3xl font-serif font-bold italic mb-2">Buat Akun</h1>
           <p className="text-sm text-text-on-dark-soft tracking-wide">Mulai kelola portofolio energi kamu sekarang.</p>

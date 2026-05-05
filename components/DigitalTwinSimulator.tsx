@@ -23,7 +23,7 @@ export function DigitalTwinSimulator({
 
   return (
     <div className="fixed inset-0 bg-surface-dark/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-surface-dark-elevated border border-surface-hairline/20 rounded-[32px] p-8 w-full max-w-md text-text-on-dark shadow-2xl relative">
+      <div className="bg-surface-dark-elevated border border-surface-hairline/20 rounded-2xl p-8 w-full max-w-md text-text-on-dark relative">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-xl font-serif font-bold italic flex items-center gap-2">
@@ -101,7 +101,7 @@ export function DigitalTwinSimulator({
         </div>
 
         <button
-          className={`w-full py-4 rounded-xl flex items-center justify-center text-sm font-bold tracking-wide transition-colors ${
+          className={`w-full py-4 rounded-2xl flex items-center justify-center text-sm font-bold tracking-wide transition-colors ${
             isSimulating
               ? "bg-surface-dark border border-brand-primary/30 text-brand-primary hover:bg-brand-primary/10"
               : "bg-brand-primary text-text-on-dark hover:bg-brand-primary-active"

@@ -21,7 +21,7 @@ export default function LeaderboardPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-12 gap-8 mt-8">
         <div className="md:col-span-8 flex flex-col gap-6">
-          <div className="relative overflow-hidden bg-brand-primary rounded-[32px] p-8 text-text-on-dark min-h-[200px] flex items-center shadow-lg">
+          <div className="relative overflow-hidden bg-brand-primary rounded-2xl p-8 text-text-on-dark min-h-[200px] flex items-center">
             <Trophy className="absolute right-8 bottom-8 w-32 h-32 text-brand-primary-active opacity-50 -rotate-12" />
 
             <div className="relative z-10 w-full max-w-lg">
@@ -38,7 +38,7 @@ export default function LeaderboardPage() {
             </div>
           </div>
 
-          <div className="bg-surface-card rounded-3xl p-6 border border-surface-hairline">
+          <div className="bg-surface-card rounded-2xl p-6 border border-surface-hairline">
             <h3 className="text-[11px] font-bold uppercase tracking-widest text-brand-primary mb-6">
               Peringkat Detail
             </h3>
@@ -90,7 +90,7 @@ export default function LeaderboardPage() {
         </div>
 
         <div className="md:col-span-4 flex flex-col gap-6">
-          <div className="bg-surface-dark text-text-on-dark rounded-3xl p-6 border border-surface-dark-elevated">
+          <div className="bg-surface-dark text-text-on-dark rounded-2xl p-6 border border-surface-dark-elevated">
             <div className="flex items-center gap-3 mb-6">
               <Globe className="w-5 h-5 text-brand-primary" />
               <h3 className="font-bold">Dashboard Publik</h3>
@@ -109,10 +109,8 @@ export default function LeaderboardPage() {
           </div>
 
           <div className="flex-1 min-h-[300px]">
-            <div className="bg-surface-card rounded-3xl p-6 border border-surface-hairline h-full flex flex-col justify-center items-center text-center">
-              <div className="w-16 h-16 bg-surface-soft rounded-full flex items-center justify-center mb-4">
-                <Sparkles className="w-8 h-8 text-brand-accent-amber" />
-              </div>
+            <div className="bg-surface-card rounded-2xl p-6 border border-surface-hairline h-full flex flex-col justify-center items-center text-center">
+              <Sparkles className="w-8 h-8 text-brand-accent-amber mb-4" />
               <h3 className="text-3xl font-serif font-bold text-text-ink mb-2">
                 1.240
               </h3>

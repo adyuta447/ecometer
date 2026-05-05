@@ -42,21 +42,21 @@ export default function LandingPage() {
             Telemetri IoT bertenaga AI yang dibangun buat operasional enterprise. Prediksi tagihan, deteksi anomali, dan ekspor audit karbon sesuai SRUK dalam satu klik.
           </p>
           <div className="flex justify-center gap-6 mt-12">
-            <div className="bg-surface-card p-6 border border-surface-hairline rounded-3xl w-64 text-left">
+            <div className="bg-surface-card p-6 border border-surface-hairline rounded-2xl w-64 text-left">
               <Zap className="w-8 h-8 text-brand-accent-amber mb-4" />
               <h3 className="font-bold text-lg mb-2">AI Prediktif</h3>
               <p className="text-sm text-text-muted">
                 Simulasi pengurangan operasional dan prediksi tagihan listrik dengan akurasi 97%.
               </p>
             </div>
-            <div className="bg-surface-card p-6 border border-surface-hairline rounded-3xl w-64 text-left">
+            <div className="bg-surface-card p-6 border border-surface-hairline rounded-2xl w-64 text-left">
               <Activity className="w-8 h-8 text-brand-accent-teal mb-4" />
               <h3 className="font-bold text-lg mb-2">IoT Real-time</h3>
               <p className="text-sm text-text-muted">
                 Integrasi sensor plug-and-play yang langsung terpetakan ke topologi organisasi kamu.
               </p>
             </div>
-            <div className="bg-surface-card p-6 border border-surface-hairline rounded-3xl w-64 text-left">
+            <div className="bg-surface-card p-6 border border-surface-hairline rounded-2xl w-64 text-left">
               <Factory className="w-8 h-8 text-brand-primary mb-4" />
               <h3 className="font-bold text-lg mb-2">Bersertifikat SRUK</h3>
               <p className="text-sm text-text-muted">

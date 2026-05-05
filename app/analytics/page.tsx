@@ -48,7 +48,6 @@ export default function AnalyticsPage() {
   const [loading, setLoading] = useState(true);
   const [tariff, setTariff] = useState(1444.7);
 
-  // Noise real-time saat simulasi aktif
   const [liveFlux, setLiveFlux] = useState(0);
 
   useEffect(() => {
@@ -72,8 +71,6 @@ export default function AnalyticsPage() {
     }
     fetchData();
   }, [user]);
-
-  // Efek fluktuasi saat simulasi aktif
   useEffect(() => {
     if (!isAnySimulationActive) return;
     const interval = setInterval(() => {
@@ -107,8 +104,6 @@ export default function AnalyticsPage() {
       };
     });
   }, [efficiencyCut, liveFlux, isAnySimulationActive]);
-
-  // Chart daya real-time dari riwayat metrik
   const powerChartData = useMemo(() => {
     if (metricsHistory.length === 0) return [];
     const grouped = metricsHistory.reduce<Record<string, { time: string; power: number; count: number }>>((acc, m) => {
@@ -130,7 +125,6 @@ export default function AnalyticsPage() {
     return total;
   }, [efficiencyCut, isAnySimulationActive, liveFlux]);
 
-  // MAPE dihitung dari data simulasi
   const computedMape = useMemo(() => {
     if (!isAnySimulationActive) return 2.8;
     const metrics = Object.values(latestMetrics);
@@ -189,7 +183,7 @@ export default function AnalyticsPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-2 bg-surface-card rounded-3xl p-6 border border-surface-hairline flex flex-col font-sans min-h-[400px]">
+        <div className="md:col-span-2 bg-surface-card rounded-2xl p-6 border border-surface-hairline flex flex-col font-sans min-h-[400px]">
           <div className="flex items-start justify-between mb-6">
             <div>
               <h2 className="text-lg font-bold text-text-ink mb-1">
@@ -332,10 +326,8 @@ export default function AnalyticsPage() {
         </div>
 
         <div className="space-y-6">
-          <div className="p-6 bg-brand-primary text-text-on-dark rounded-3xl flex flex-col h-full shadow-md">
-            <div className="w-10 h-10 rounded-full bg-brand-primary-active flex items-center justify-center mb-6 shadow-inner">
-              <Sparkles className="w-5 h-5 text-brand-accent-amber" />
-            </div>
+          <div className="p-6 bg-brand-primary text-text-on-dark rounded-2xl flex flex-col h-full">
+            <Sparkles className="w-5 h-5 text-brand-accent-amber mb-6" />
             <h3 className="text-xl font-serif font-bold italic mb-2">
               Simulasi What-If
             </h3>
@@ -374,7 +366,7 @@ export default function AnalyticsPage() {
 
       {/* Chart Daya Real-Time — hanya saat perangkat aktif */}
       {isAnySimulationActive && powerChartData.length > 3 && (
-        <div className="bg-surface-card rounded-3xl p-6 border border-surface-hairline">
+        <div className="bg-surface-card rounded-2xl p-6 border border-surface-hairline">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Zap className="w-4 h-4 text-brand-accent-teal" />
@@ -419,7 +411,7 @@ export default function AnalyticsPage() {
         </div>
       )}
 
-      <div className="bg-surface-card rounded-3xl p-6 border border-surface-hairline mt-6">
+      <div className="bg-surface-card rounded-2xl p-6 border border-surface-hairline mt-6">
         <h3 className="text-sm font-bold uppercase tracking-widest text-text-ink mb-6">
           Akurasi & Pelatihan Model
         </h3>

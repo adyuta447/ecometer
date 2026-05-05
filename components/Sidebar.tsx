@@ -89,7 +89,7 @@ export function Sidebar() {
       </nav>
 
       <div className="mt-auto">
-        <div className="p-4 bg-surface-dark rounded-2xl text-text-on-dark shadow-sm mb-4">
+        <div className="p-4 bg-surface-dark rounded-2xl text-text-on-dark mb-4">
           <div className="text-[10px] text-text-on-dark-soft mb-1 uppercase tracking-widest font-bold">
             Skor Agregasi
             {isAnySimulationActive && (

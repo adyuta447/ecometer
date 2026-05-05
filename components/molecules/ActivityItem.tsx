@@ -3,7 +3,6 @@
 import { ActivityIcon } from "@/components/atoms/ActivityIcon";
 import {
   getActivityIconName,
-  getSeverityBg,
   getSeverityColor,
   getSeverityIconColor,
   formatTimeAgo,
@@ -23,9 +22,7 @@ export function ActivityItem({ activity, compact = false }: ActivityItemProps) {
     return (
       <div className="p-3 bg-white/50 rounded-2xl border border-white/40 hover:bg-white/70 transition-colors">
         <div className="flex items-start gap-2.5">
-          <div className={`w-7 h-7 rounded-lg ${getSeverityBg(activity.severity)} flex items-center justify-center flex-shrink-0`}>
-            <ActivityIcon name={iconName} className={`w-3.5 h-3.5 ${getSeverityIconColor(activity.severity)}`} />
-          </div>
+          <ActivityIcon name={iconName} className={`w-4 h-4 ${getSeverityIconColor(activity.severity)} flex-shrink-0 mt-0.5`} />
           <div className="flex-1 min-w-0">
             <div className="flex justify-between items-start mb-0.5">
               <span className={`text-[10px] font-bold uppercase tracking-widest ${getSeverityColor(activity.severity)}`}>
@@ -47,9 +44,7 @@ export function ActivityItem({ activity, compact = false }: ActivityItemProps) {
   return (
     <div className="p-3 hover:bg-surface-soft/50 transition-colors">
       <div className="flex items-start gap-3">
-        <div className={`w-8 h-8 rounded-xl ${getSeverityBg(activity.severity)} flex items-center justify-center flex-shrink-0 mt-0.5`}>
-          <ActivityIcon name={iconName} className={`w-4 h-4 ${getSeverityIconColor(activity.severity)}`} />
-        </div>
+        <ActivityIcon name={iconName} className={`w-4 h-4 ${getSeverityIconColor(activity.severity)} flex-shrink-0 mt-0.5`} />
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
             <span className={`text-[10px] font-bold uppercase tracking-widest ${getSeverityColor(activity.severity)}`}>

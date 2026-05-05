@@ -55,7 +55,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
               initial={{ opacity: 0, y: -20, x: 20 }}
               animate={{ opacity: 1, y: 0, x: 0 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-surface-dark-elevated border border-surface-hairline/20 rounded-xl p-4 shadow-xl flex items-start gap-3 min-w-[300px] max-w-md text-text-on-dark"
+              className="bg-surface-dark-elevated border border-surface-hairline/20 rounded-2xl p-4 flex items-start gap-3 min-w-[300px] max-w-md text-text-on-dark"
             >
               {icons[n.type]}
               <p className="text-sm flex-1 font-medium mt-0.5">{n.message}</p>

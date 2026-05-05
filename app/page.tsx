@@ -20,7 +20,6 @@ export default function Home() {
   const { aggregatedStats, activeSimulations, isAnySimulationActive, anomalyCount, latestMetrics } = useSimulator();
   const [recentActivities, setRecentActivities] = useState<ActivityEntry[]>([]);
 
-  // Ambil aktivitas terbaru untuk panel notifikasi
   useEffect(() => {
     if (!user) return;
     const load = async () => {
@@ -32,12 +31,10 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [user, activeSimulations]);
 
-  // Hitung metrik real-time
   const totalPowerKw = aggregatedStats.totalPower / 1000;
   const totalCo2e = aggregatedStats.totalCo2e;
   const totalUsageKwh = aggregatedStats.totalUsageKwh;
 
-  // Hitung MAPE dari variansi simulasi
   const computeMape = () => {
     if (!isAnySimulationActive) return "N/A";
     const baseError = 2.8;
@@ -49,11 +46,9 @@ export default function Home() {
 
   return (
     <div className="p-8 grid grid-cols-12 gap-6 max-w-6xl mx-auto">
-      {/* Kartu Proyeksi Utama */}
       <ForecastingChart />
 
-      {/* Feed Aktivitas — data real dari Firestore */}
-      <section className="col-span-12 md:col-span-4 bg-surface-card border border-surface-hairline rounded-[32px] p-6 flex flex-col">
+      <section className="col-span-12 md:col-span-4 bg-surface-card border border-surface-hairline rounded-2xl p-6 flex flex-col">
         <div className="flex justify-between items-start mb-4">
           <div className="text-[11px] font-bold uppercase tracking-widest text-brand-primary">
             Aktivitas Terkini
@@ -81,84 +76,60 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Ringkasan Telemetri Live */}
       {isAnySimulationActive && (
         <section className="col-span-12 grid grid-cols-2 md:grid-cols-4 gap-4">
           <StatCard
             label="Daya Live"
             value={`${totalPowerKw.toFixed(2)} kW`}
             icon={<Zap className="w-4 h-4 text-brand-accent-teal" />}
-            iconBg="bg-brand-accent-teal/10"
           />
           <StatCard
             label="CO₂e Sesi Ini"
             value={`${totalCo2e.toFixed(4)} kg`}
             icon={<Leaf className="w-4 h-4 text-brand-accent-amber" />}
-            iconBg="bg-brand-accent-amber/10"
           />
           <StatCard
             label="Perangkat Aktif"
             value={activeSimulations.length}
             icon={<Activity className="w-4 h-4 text-brand-primary" />}
-            iconBg="bg-brand-primary/10"
           />
           <StatCard
             label="Anomali"
             value={anomalyCount}
-            icon={<BarChart3 className="w-4 h-4 text-red-500" />}
-            iconBg="bg-red-500/10"
+            icon={<BarChart3 className="w-4 h-4 text-brand-primary" />}
           />
         </section>
       )}
 
-      {/* Grup Perangkat Virtual & Papan Peringkat */}
       <section className="col-span-12 grid grid-cols-1 md:grid-cols-3 gap-6">
         <DeviceGroups />
         <Leaderboard />
       </section>
 
-      {/* Footer Statistik */}
       <section className="col-span-12 border-t border-surface-hairline pt-6 flex flex-col sm:flex-row justify-between gap-4 mt-2">
         <div className="flex flex-wrap gap-12">
           <div>
-            <div className="text-[10px] uppercase font-bold text-text-muted-soft mb-1">
-              Validasi Teknis
-            </div>
+            <div className="text-[10px] uppercase font-bold text-text-muted-soft mb-1">Validasi Teknis</div>
             <div className="text-sm font-medium text-text-ink flex gap-1 items-center">
-              Akurasi MAPE:
-              <span className="text-brand-primary">
-                {computeMape()}
-              </span>
+              Akurasi MAPE: <span className="text-brand-primary">{computeMape()}</span>
             </div>
           </div>
           <div>
-            <div className="text-[10px] uppercase font-bold text-text-muted-soft mb-1">
-              Total Daya Terpetakan
-            </div>
+            <div className="text-[10px] uppercase font-bold text-text-muted-soft mb-1">Total Daya Terpetakan</div>
             <div className="text-sm font-medium text-brand-accent-teal">
-              {isAnySimulationActive
-                ? totalPowerKw.toFixed(2) + " kW"
-                : "N/A"}
+              {isAnySimulationActive ? totalPowerKw.toFixed(2) + " kW" : "N/A"}
             </div>
           </div>
           <div>
-            <div className="text-[10px] uppercase font-bold text-text-muted-soft mb-1">
-              CO2e Sesi Tercatat
-            </div>
+            <div className="text-[10px] uppercase font-bold text-text-muted-soft mb-1">CO2e Sesi Tercatat</div>
             <div className="text-sm font-medium text-brand-accent-amber">
-              {isAnySimulationActive
-                ? totalCo2e.toFixed(6) + " kg"
-                : "N/A"}
+              {isAnySimulationActive ? totalCo2e.toFixed(6) + " kg" : "N/A"}
             </div>
           </div>
           <div>
-            <div className="text-[10px] uppercase font-bold text-text-muted-soft mb-1">
-              Total Pemakaian (Sesi)
-            </div>
+            <div className="text-[10px] uppercase font-bold text-text-muted-soft mb-1">Total Pemakaian (Sesi)</div>
             <div className="text-sm font-medium text-brand-primary">
-              {isAnySimulationActive
-                ? totalUsageKwh.toFixed(4) + " kWh"
-                : "N/A"}
+              {isAnySimulationActive ? totalUsageKwh.toFixed(4) + " kWh" : "N/A"}
             </div>
           </div>
         </div>

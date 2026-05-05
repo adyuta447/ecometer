@@ -67,7 +67,6 @@ export function SimulatorProvider({ children }: { children: React.ReactNode }) {
         ? prev.filter((id) => id !== deviceId)
         : [...prev, deviceId];
 
-      // Log the activity
       if (user) {
         const label = deviceName || deviceId;
         if (isActive) {

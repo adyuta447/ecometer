@@ -30,9 +30,9 @@ export default function IntegrationsPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-surface-card rounded-3xl p-6 border border-brand-primary/20 shadow-sm relative overflow-hidden flex flex-col">
+        <div className="bg-surface-card rounded-2xl p-6 border border-brand-primary/20 relative overflow-hidden flex flex-col">
           <div className="flex justify-between items-start mb-6">
-            <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center border border-surface-hairline shadow-sm">
+            <div className="w-12 h-12 flex items-center justify-center">
               <span className="font-serif font-bold text-xl text-brand-primary">Xero</span>
             </div>
             <span className="flex items-center gap-1.5 px-2.5 py-1 bg-brand-accent-teal/10 text-brand-accent-teal text-[10px] font-bold uppercase tracking-widest rounded-md">
@@ -47,9 +47,9 @@ export default function IntegrationsPage() {
           </div>
         </div>
 
-        <div className="bg-surface-canvas rounded-3xl p-6 border border-surface-hairline flex flex-col">
+        <div className="bg-surface-canvas rounded-2xl p-6 border border-surface-hairline flex flex-col">
           <div className="flex justify-between items-start mb-6">
-            <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center border border-surface-hairline shadow-sm">
+            <div className="w-12 h-12 flex items-center justify-center">
               <span className="font-sans font-bold text-lg text-blue-600">Jurnal</span>
             </div>
           </div>
@@ -60,9 +60,9 @@ export default function IntegrationsPage() {
           </div>
         </div>
 
-        <div className="bg-surface-canvas rounded-3xl p-6 border border-surface-hairline flex flex-col">
+        <div className="bg-surface-canvas rounded-2xl p-6 border border-surface-hairline flex flex-col">
           <div className="flex justify-between items-start mb-6">
-            <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center border border-surface-hairline shadow-sm">
+            <div className="w-12 h-12 flex items-center justify-center">
               <span className="font-sans font-bold text-xl text-orange-500 text-center leading-none">S<br/>A P</span>
             </div>
           </div>
@@ -74,7 +74,7 @@ export default function IntegrationsPage() {
         </div>
       </div>
 
-      <div className="bg-surface-dark rounded-[32px] p-8 text-text-on-dark shadow-xl mt-8 flex flex-col lg:flex-row gap-8">
+      <div className="bg-surface-dark rounded-2xl p-8 text-text-on-dark mt-8 flex flex-col lg:flex-row gap-8">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-4">
             <Layers className="w-5 h-5 text-brand-primary" />

@@ -5,9 +5,14 @@ import { usePathname } from "next/navigation";
 import { Users, Plug, Trophy, Settings, Box, LayoutDashboard, Activity, FileText, Router, LogOut } from "lucide-react";
 import { auth } from "@/lib/firebase";
 import { signOut } from "firebase/auth";
+import { useAuth } from "./AuthProvider";
+import { useSimulator } from "./SimulatorProvider";
+import { logActivity } from "@/lib/activityLog";
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { user } = useAuth();
+  const { isAnySimulationActive, activeSimulations, aggregatedStats, anomalyCount } = useSimulator();
 
   const getLinkClasses = (path: string) => {
     const isActive = pathname === path;
@@ -19,8 +24,16 @@ export function Sidebar() {
   };
 
   const handleLogout = async () => {
+    if (user) {
+      await logActivity(user.uid, "logout", "User logged out", "info");
+    }
     await signOut(auth);
   };
+
+  // Compute aggregation score from live data
+  const aggregationScore = isAnySimulationActive
+    ? Math.max(85, 100 - anomalyCount * 0.5 - (aggregatedStats.totalPower > 5000 ? 2 : 0)).toFixed(1)
+    : "97.5";
 
   return (
     <aside className="w-64 border-r border-surface-hairline flex flex-col p-6 bg-surface-canvas font-sans sticky top-0 h-screen">
@@ -61,7 +74,12 @@ export function Sidebar() {
           <div className="text-[11px] font-bold uppercase tracking-widest text-text-muted-soft mb-4">System</div>
           <Link href="/devices" className={getLinkClasses("/devices")}>
             <Router className="w-4 h-4 ml-0.5" />
-            <span>IoT Devices</span>
+            <span className="flex items-center gap-2">
+              IoT Devices
+              {isAnySimulationActive && (
+                <span className="w-1.5 h-1.5 rounded-full bg-brand-accent-teal animate-pulse"></span>
+              )}
+            </span>
           </Link>
           <Link href="/settings/billing" className={getLinkClasses("/settings/billing")}>
             <Settings className="w-4 h-4 ml-0.5" />
@@ -72,11 +90,24 @@ export function Sidebar() {
 
       <div className="mt-auto">
         <div className="p-4 bg-surface-dark rounded-2xl text-text-on-dark shadow-sm mb-4">
-          <div className="text-[10px] text-text-on-dark-soft mb-1 uppercase tracking-widest font-bold">Aggregation Score</div>
-          <div className="text-2xl font-serif">97.5%</div>
-          <div className="w-full bg-surface-dark-elevated h-1 rounded-full mt-2">
-            <div className="bg-brand-primary h-full rounded-full" style={{ width: '97.5%' }}></div>
+          <div className="text-[10px] text-text-on-dark-soft mb-1 uppercase tracking-widest font-bold">
+            Aggregation Score
+            {isAnySimulationActive && (
+              <span className="ml-1 text-brand-accent-teal">• Live</span>
+            )}
           </div>
+          <div className="text-2xl font-serif">{aggregationScore}%</div>
+          <div className="w-full bg-surface-dark-elevated h-1 rounded-full mt-2">
+            <div
+              className="bg-brand-primary h-full rounded-full transition-all duration-1000"
+              style={{ width: `${aggregationScore}%` }}
+            ></div>
+          </div>
+          {isAnySimulationActive && (
+            <div className="text-[9px] text-text-on-dark-soft mt-1.5">
+              {activeSimulations.length} device(s) · {(aggregatedStats.totalPower / 1000).toFixed(2)} kW
+            </div>
+          )}
         </div>
 
         <button onClick={handleLogout} className="flex items-center gap-3 w-full p-2 text-text-muted hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-colors text-sm font-medium">

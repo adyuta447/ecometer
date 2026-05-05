@@ -13,9 +13,11 @@ import {
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/components/AuthProvider";
+import { useNotification } from "@/components/NotificationProvider";
 
 export default function BillingSettingsPage() {
   const { user } = useAuth();
+  const { addNotification } = useNotification();
   const [tariff, setTariff] = useState("1444.70");
   const [budget, setBudget] = useState("45000000");
   const [co2Factor, setCo2Factor] = useState("0.87");
@@ -76,9 +78,9 @@ export default function BillingSettingsPage() {
         });
         setSettingId(docRef.id);
       }
-      alert("Configuration specific tariff baseline saved successfully.");
-    } catch (error) {
-      console.error("Error saving settings", error);
+      addNotification("Configuration specific tariff baseline saved successfully.", "success");
+    } catch (error: any) {
+      addNotification(error.message || "Failed to save settings.", "error");
     } finally {
       setIsSaving(false);
     }

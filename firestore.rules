@@ -81,5 +81,21 @@ service cloud.firestore {
       allow update, delete: if isSignedIn() && 
                     existing().userId == request.auth.uid;
     }
+
+    match /activity_log/{logId} {
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow get: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && 
+                    incoming().userId == request.auth.uid;
+      allow delete: if isSignedIn() && 
+                    existing().userId == request.auth.uid;
+    }
+
+    match /realtime_metrics/{metricId} {
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow get: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && 
+                    incoming().userId == request.auth.uid;
+    }
   }
 }

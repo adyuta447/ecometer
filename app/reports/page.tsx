@@ -8,15 +8,21 @@ import {
   Loader2,
   Factory,
   FileSpreadsheet,
+  AlertTriangle,
+  TrendingDown,
 } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { useSimulator } from "@/components/SimulatorProvider";
+import { logActivity } from "@/lib/activityLog";
+import { useNotification } from "@/components/NotificationProvider";
 
 export default function ReportsPage() {
   const { user } = useAuth();
+  const { addNotification } = useNotification();
+  const { isAnySimulationActive, aggregatedStats, activeSimulations, metricsHistory, anomalyCount } = useSimulator();
   const [isExporting, setIsExporting] = useState(false);
-  const [toastMessage, setToastMessage] = useState("");
   const [co2Factor, setCo2Factor] = useState(0.87);
   const [loading, setLoading] = useState(true);
 
@@ -42,18 +48,59 @@ export default function ReportsPage() {
     fetchSettings();
   }, [user]);
 
-  const handleExport = () => {
+  const handleExport = async () => {
     setIsExporting(true);
+    if (user) {
+      await logActivity(user.uid, "export_report", "SRUK Audit report exported", "success", {
+        totalEnergyMwh: totalEnergyMwh.toFixed(1),
+        totalEmissions: calculateEmissions(totalEnergyMwh * 1000),
+      });
+    }
     setTimeout(() => {
       setIsExporting(false);
-      setToastMessage("Dokumen Audit SRUK berhasil di-generate.");
-      setTimeout(() => setToastMessage(""), 5000); // clear toast after 5s
+      addNotification("Dokumen Audit SRUK berhasil di-generate.", "success");
     }, 2000);
   };
 
   const calculateEmissions = (kwh: number) => {
     return ((kwh * co2Factor) / 1000).toFixed(1);
   };
+  const baseEnergyMwh = 104.3;
+  const liveSessionKwh = aggregatedStats.totalUsageKwh;
+  const totalEnergyMwh = isAnySimulationActive
+    ? baseEnergyMwh + liveSessionKwh / 1000
+    : baseEnergyMwh;
+
+  const totalEmissions = calculateEmissions(totalEnergyMwh * 1000);
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const currentMonth = now.getMonth();
+  const baseEmissionData = [
+    { period: `Jan ${currentYear}`, sector: "HVAC Systems", kwh: 45200, trend: null as string | null },
+    { period: `Feb ${currentYear}`, sector: "HVAC Systems", kwh: 38100, trend: "↓ 15%" },
+    { period: `Mar ${currentYear}`, sector: "HVAC + Lighting", kwh: 32400, trend: "↓ 10%" },
+  ];
+  const emissionData = [...baseEmissionData];
+  if (isAnySimulationActive && currentMonth >= 3) {
+    const liveKwh = 21000 + liveSessionKwh;
+    const prevKwh = baseEmissionData[baseEmissionData.length - 1].kwh;
+    const trendPercent = ((liveKwh - prevKwh) / prevKwh * 100).toFixed(0);
+    const trendDir = liveKwh < prevKwh ? "↓" : "↑";
+    emissionData.push({
+      period: `${months[currentMonth]} ${currentYear} (Live)`,
+      sector: `${activeSimulations.length} Active Device(s)`,
+      kwh: Math.round(liveKwh),
+      trend: `${trendDir} ${Math.abs(Number(trendPercent))}%`,
+    });
+  }
+
+  // Determine validation status based on simulation data
+  const validationStatus = isAnySimulationActive
+    ? anomalyCount === 0
+      ? { label: "Validated (Live)", color: "text-brand-accent-teal", icon: CheckCircle2 }
+      : { label: `${anomalyCount} Anomalies Flagged`, color: "text-brand-accent-amber", icon: AlertTriangle }
+    : { label: "Ready for SRUK Submission (Q1)", color: "text-brand-accent-teal", icon: CheckCircle2 };
 
   if (loading)
     return (
@@ -61,6 +108,7 @@ export default function ReportsPage() {
         <Loader2 className="w-6 h-6 animate-spin text-brand-primary" />
       </div>
     );
+
   return (
     <div className="p-8 max-w-6xl mx-auto space-y-8 relative pb-20">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -69,8 +117,12 @@ export default function ReportsPage() {
             SRUK Compliance & Reports
           </h1>
           <p className="text-sm text-text-muted">
-            Formal audit trail for National Carbon Registry (SRUK) July 2026
-            Mandate.
+            Formal audit trail for National Carbon Registry (SRUK) July 2026 Mandate.
+            {isAnySimulationActive && (
+              <span className="ml-2 text-brand-accent-teal font-medium">
+                • Live data from {activeSimulations.length} device(s)
+              </span>
+            )}
           </p>
         </div>
         <button
@@ -94,9 +146,15 @@ export default function ReportsPage() {
               Total Energy Usage
             </p>
             <h3 className="text-3xl font-serif font-bold text-text-ink">
-              104.3 MWh
+              {totalEnergyMwh.toFixed(1)} MWh
             </h3>
           </div>
+          {isAnySimulationActive && (
+            <div className="mt-3 flex items-center gap-1.5 text-[10px] text-brand-accent-teal font-bold uppercase tracking-widest">
+              <span className="w-1.5 h-1.5 rounded-full bg-brand-accent-teal animate-pulse"></span>
+              +{(liveSessionKwh / 1000).toFixed(4)} MWh (Live Session)
+            </div>
+          )}
         </div>
         <div className="bg-surface-card rounded-[24px] p-6 border border-surface-hairline flex flex-col justify-between min-h-[140px]">
           <div>
@@ -104,20 +162,31 @@ export default function ReportsPage() {
               Calculated Emissions
             </p>
             <h3 className="text-3xl font-serif font-bold text-text-ink">
-              {calculateEmissions(104300)} mt
+              {totalEmissions} mt
             </h3>
           </div>
+          {isAnySimulationActive && (
+            <div className="mt-3 flex items-center gap-1.5 text-[10px] text-brand-accent-amber font-bold uppercase tracking-widest">
+              <span className="w-1.5 h-1.5 rounded-full bg-brand-accent-amber animate-pulse"></span>
+              CO₂e Factor: {co2Factor} kgCO2e/kWh
+            </div>
+          )}
         </div>
         <div className="bg-surface-dark rounded-[24px] p-6 text-text-on-dark flex flex-col justify-between min-h-[140px] shadow-lg">
           <div className="flex items-center gap-2 mb-2">
-            <CheckCircle2 className="w-4 h-4 text-brand-accent-teal" />
-            <p className="text-[10px] uppercase font-bold text-brand-accent-teal tracking-widest">
-              Status Validated
+            <validationStatus.icon className={`w-4 h-4 ${validationStatus.color}`} />
+            <p className={`text-[10px] uppercase font-bold ${validationStatus.color} tracking-widest`}>
+              {anomalyCount > 0 && isAnySimulationActive ? "Review Required" : "Status Validated"}
             </p>
           </div>
           <h3 className="text-xl font-medium leading-tight">
-            Ready for SRUK Submission (Q1)
+            {validationStatus.label}
           </h3>
+          {isAnySimulationActive && (
+            <div className="mt-2 text-[10px] text-text-on-dark-soft">
+              Data quality: {metricsHistory.length} datapoints this session
+            </div>
+          )}
         </div>
       </div>
 
@@ -129,6 +198,12 @@ export default function ReportsPage() {
               Emission Equivalency Log
             </h3>
           </div>
+          {isAnySimulationActive && (
+            <span className="flex items-center gap-1.5 px-3 py-1 bg-brand-accent-teal/10 text-brand-accent-teal text-[10px] font-bold uppercase tracking-widest rounded-full">
+              <span className="w-1.5 h-1.5 rounded-full bg-brand-accent-teal animate-pulse"></span>
+              Real-Time
+            </span>
+          )}
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm whitespace-nowrap">
@@ -152,69 +227,93 @@ export default function ReportsPage() {
               </tr>
             </thead>
             <tbody className="text-text-body font-medium">
-              <tr className="hover:bg-surface-soft/50 transition-colors">
-                <td className="px-6 py-4 border-b border-surface-hairline border-dashed">
-                  Jan {new Date().getFullYear()}
-                </td>
-                <td className="px-6 py-4 border-b border-surface-hairline border-dashed">
-                  HVAC Systems
-                </td>
-                <td className="px-6 py-4 border-b border-surface-hairline border-dashed">
-                  45,200
-                </td>
-                <td className="px-6 py-4 border-b border-surface-hairline border-dashed">
-                  {co2Factor} kgCO2e/kWh
-                </td>
-                <td className="px-6 py-4 border-b border-surface-hairline border-dashed text-right font-serif text-base">
-                  {calculateEmissions(45200)}
-                </td>
-              </tr>
-              <tr className="hover:bg-surface-soft/50 transition-colors">
-                <td className="px-6 py-4 border-b border-surface-hairline border-dashed">
-                  Feb {new Date().getFullYear()}
-                </td>
-                <td className="px-6 py-4 border-b border-surface-hairline border-dashed">
-                  HVAC Systems
-                </td>
-                <td className="px-6 py-4 border-b border-surface-hairline border-dashed">
-                  38,100{" "}
-                  <span className="text-[10px] text-brand-accent-teal ml-2">
-                    ↓ 15%
-                  </span>
-                </td>
-                <td className="px-6 py-4 border-b border-surface-hairline border-dashed">
-                  {co2Factor} kgCO2e/kWh
-                </td>
-                <td className="px-6 py-4 border-b border-surface-hairline border-dashed text-right font-serif text-base text-brand-accent-teal">
-                  {calculateEmissions(38100)}
-                </td>
-              </tr>
-              <tr className="hover:bg-surface-soft/50 transition-colors bg-brand-primary/5">
-                <td className="px-6 py-4 border-b border-surface-hairline">
-                  Mar {new Date().getFullYear()} (MTD)
-                </td>
-                <td className="px-6 py-4 border-b border-surface-hairline">
-                  HVAC Systems
-                </td>
-                <td className="px-6 py-4 border-b border-surface-hairline">
-                  21,000
-                </td>
-                <td className="px-6 py-4 border-b border-surface-hairline">
-                  {co2Factor} kgCO2e/kWh
-                </td>
-                <td className="px-6 py-4 border-b border-surface-hairline text-right font-serif text-base text-brand-primary">
-                  {calculateEmissions(21000)}
-                </td>
-              </tr>
+              {emissionData.map((row, index) => {
+                const isLive = row.period.includes("Live");
+                const isLastBase = index === baseEmissionData.length - 1 && !isLive;
+                return (
+                  <tr
+                    key={row.period}
+                    className={`hover:bg-surface-soft/50 transition-colors ${
+                      isLive
+                        ? "bg-brand-accent-teal/5 border-l-2 border-l-brand-accent-teal"
+                        : isLastBase
+                        ? "bg-brand-primary/5"
+                        : ""
+                    }`}
+                  >
+                    <td className="px-6 py-4 border-b border-surface-hairline border-dashed">
+                      <div className="flex items-center gap-2">
+                        {row.period}
+                        {isLive && (
+                          <span className="w-1.5 h-1.5 rounded-full bg-brand-accent-teal animate-pulse"></span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 border-b border-surface-hairline border-dashed">
+                      {row.sector}
+                    </td>
+                    <td className="px-6 py-4 border-b border-surface-hairline border-dashed">
+                      {row.kwh.toLocaleString("id-ID")}
+                      {row.trend && (
+                        <span className={`text-[10px] ml-2 ${
+                          row.trend.includes("↓") ? "text-brand-accent-teal" : "text-brand-primary"
+                        }`}>
+                          {row.trend}
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 border-b border-surface-hairline border-dashed">
+                      {co2Factor} kgCO2e/kWh
+                    </td>
+                    <td className={`px-6 py-4 border-b border-surface-hairline border-dashed text-right font-serif text-base ${
+                      isLive
+                        ? "text-brand-accent-teal"
+                        : index === 0
+                        ? ""
+                        : "text-brand-accent-teal"
+                    }`}>
+                      {calculateEmissions(row.kwh)}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
       </div>
 
-      {toastMessage && (
-        <div className="fixed bottom-8 right-8 bg-surface-dark text-text-on-dark px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 animate-in fade-in slide-in-from-bottom-5">
-          <CheckCircle2 className="w-5 h-5 text-brand-accent-teal" />
-          <p className="text-sm font-medium">{toastMessage}</p>
+      {/* Live Session Summary */}
+      {isAnySimulationActive && (
+        <div className="bg-surface-dark rounded-[24px] p-6 text-text-on-dark">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-xl bg-brand-accent-teal/20 flex items-center justify-center">
+              <Factory className="w-5 h-5 text-brand-accent-teal" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold uppercase tracking-widest">Live Audit Session</h3>
+              <p className="text-[10px] text-text-on-dark-soft mt-0.5">
+                Real-time emission tracking from {activeSimulations.length} active IoT sensor(s)
+              </p>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="p-3 bg-surface-dark-elevated rounded-xl border border-surface-hairline/10">
+              <div className="text-[10px] uppercase font-bold text-text-on-dark-soft tracking-widest mb-1">Session kWh</div>
+              <div className="text-lg font-serif font-bold text-white">{liveSessionKwh.toFixed(4)}</div>
+            </div>
+            <div className="p-3 bg-surface-dark-elevated rounded-xl border border-surface-hairline/10">
+              <div className="text-[10px] uppercase font-bold text-text-on-dark-soft tracking-widest mb-1">Session CO₂e</div>
+              <div className="text-lg font-serif font-bold text-brand-accent-teal">{aggregatedStats.totalCo2e.toFixed(6)} kg</div>
+            </div>
+            <div className="p-3 bg-surface-dark-elevated rounded-xl border border-surface-hairline/10">
+              <div className="text-[10px] uppercase font-bold text-text-on-dark-soft tracking-widest mb-1">Current Draw</div>
+              <div className="text-lg font-serif font-bold text-brand-accent-amber">{(aggregatedStats.totalPower / 1000).toFixed(2)} kW</div>
+            </div>
+            <div className="p-3 bg-surface-dark-elevated rounded-xl border border-surface-hairline/10">
+              <div className="text-[10px] uppercase font-bold text-text-on-dark-soft tracking-widest mb-1">Data Points</div>
+              <div className="text-lg font-serif font-bold text-white">{metricsHistory.length}</div>
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -1,119 +1,121 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { collection, doc, setDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
 import { useAuth } from "./AuthProvider";
-import { Activity, Power, Wifi, StopCircle } from "lucide-react";
+import { Activity, Power, Wifi, StopCircle, X } from "lucide-react";
+import { useSimulator } from "./SimulatorProvider";
 
-export function DigitalTwinSimulator() {
+interface DigitalTwinSimulatorProps {
+  device?: any;
+  onClose: () => void;
+}
+
+export function DigitalTwinSimulator({
+  device,
+  onClose,
+}: DigitalTwinSimulatorProps) {
   const { user } = useAuth();
-  const [isSimulating, setIsSimulating] = useState(false);
-  const [currentMetrics, setCurrentMetrics] = useState<any>(null);
+  const { activeSimulations, toggleSimulation, latestMetrics } = useSimulator();
 
-  useEffect(() => {
-    if (!user || !isSimulating) return;
+  if (!user || !device) return null;
 
-    const interval = setInterval(async () => {
-      const now = new Date();
-      const hour = now.getHours();
-      
-      // Base simulation values
-      let voltage = 220 + (Math.random() * 4 - 2); // 218V - 222V
-      let isOffHours = hour < 7 || hour > 19;
-      let baseCurrent = isOffHours ? 2 : 12; // 2A off-hours, 12A operational
-      
-      // Simulate Anomaly (e.g. random HVAC spike during off-hours)
-      const hasAnomaly = isOffHours && Math.random() > 0.8;
-      if (hasAnomaly) {
-        baseCurrent += 8; // Spike current
-      }
-      
-      const current = baseCurrent + (Math.random() * 2 - 1);
-      const power = voltage * current; // Watt
-      
-      // Translasi Emisi Karbon (kg CO2e) - Assuming 0.8 kgCO2e per kWh
-      const runTimeHours = 1 / 3600; // 1 second in hours
-      const energy_kWh = (power / 1000) * runTimeHours;
-      const co2e = energy_kWh * 0.8; 
-
-      const payload = {
-        userId: user.uid,
-        timestamp: now.toISOString(),
-        voltage: parseFloat(voltage.toFixed(2)),
-        current: parseFloat(current.toFixed(2)),
-        power: parseFloat(power.toFixed(2)),
-        co2e: parseFloat(co2e.toFixed(6)),
-        anomaly: hasAnomaly,
-      };
-
-      setCurrentMetrics(payload);
-
-      // Pushing to Firebase Firestore
-      try {
-        const metricRef = doc(collection(db, "realtime_metrics"));
-        await setDoc(metricRef, payload);
-      } catch (err) {
-        console.error("Simulation error", err);
-      }
-    }, 2000);
-
-    return () => clearInterval(interval);
-  }, [user, isSimulating]);
-
-  if (!user) return null;
+  const isSimulating = activeSimulations.includes(device.id);
+  const currentMetrics = latestMetrics[device.id];
 
   return (
-    <div className="fixed bottom-4 right-4 w-80 shadow-2xl rounded-xl z-50 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 backdrop-blur overflow-hidden">
-      <div className="p-4 border-b border-gray-100 dark:border-zinc-800">
-        <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-sm flex items-center gap-2 dark:text-zinc-100 text-gray-900">
-            <Activity className="w-4 h-4 text-blue-500" />
-            Digital Twin Simulator
-          </h3>
-          <Wifi className={`w-4 h-4 ${isSimulating ? "text-green-500 animate-pulse" : "text-gray-400 dark:text-zinc-500"}`} />
-        </div>
-        <p className="text-xs text-gray-500 dark:text-zinc-400 mt-1">
-          Clamp CT Hardware Mock
-        </p>
-      </div>
-      <div className="p-4">
-        {currentMetrics && isSimulating ? (
-           <div className="grid grid-cols-2 gap-2 text-xs mb-4">
-              <div className="bg-gray-50 dark:bg-zinc-950 p-2 rounded border border-gray-100 dark:border-zinc-800">
-                <span className="text-gray-500 dark:text-zinc-400 block mb-1">Voltage</span>
-                <span className="font-mono font-medium dark:text-zinc-100">{currentMetrics.voltage} V</span>
-              </div>
-              <div className="bg-gray-50 dark:bg-zinc-950 p-2 rounded border border-gray-100 dark:border-zinc-800">
-                <span className="text-gray-500 dark:text-zinc-400 block mb-1">Current</span>
-                <span className="font-mono font-medium dark:text-zinc-100">{currentMetrics.current} A</span>
-              </div>
-              <div className="bg-gray-50 dark:bg-zinc-950 p-2 rounded border border-gray-100 dark:border-zinc-800">
-                <span className="text-gray-500 dark:text-zinc-400 block mb-1">Power</span>
-                <span className="font-mono font-medium dark:text-zinc-100">{currentMetrics.power} W</span>
-              </div>
-              <div className={`p-2 rounded border ${currentMetrics.anomaly ? 'bg-red-50 border-red-100 dark:bg-red-900/20 dark:border-red-900/50' : 'bg-gray-50 border-gray-100 dark:bg-zinc-950 dark:border-zinc-800'}`}>
-                <span className={`block mb-1 ${currentMetrics.anomaly ? 'text-red-500 dark:text-red-400' : 'text-gray-500 dark:text-zinc-400'}`}>CO₂e (est)</span>
-                <span className={`font-mono font-medium ${currentMetrics.anomaly ? 'text-red-600 dark:text-red-300' : 'dark:text-zinc-100'}`}>{currentMetrics.co2e}</span>
-              </div>
-           </div>
-        ) : (
-          <div className="text-xs text-gray-500 dark:text-zinc-400 mb-4 p-3 bg-gray-50 dark:bg-zinc-950 rounded-lg border border-gray-100 dark:border-zinc-800 text-center">
-            Simulator inactive. Press start to send mock IoT data to Firebase.
+    <div className="fixed inset-0 bg-surface-dark/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="bg-surface-dark-elevated border border-surface-hairline/20 rounded-[32px] p-8 w-full max-w-md text-text-on-dark shadow-2xl relative">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="text-xl font-serif font-bold italic flex items-center gap-2">
+              <Activity className="w-5 h-5 text-brand-primary" />
+              Digital Twin Simulator
+            </h2>
+            <p className="text-[10px] uppercase font-bold text-text-on-dark-soft tracking-widest mt-1">
+              {device.name}
+            </p>
           </div>
-        )}
-        <button 
-          className={`w-full py-2 px-4 rounded-lg flex items-center justify-center text-xs font-medium transition-colors ${
-            isSimulating 
-              ? "bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/40" 
-              : "bg-blue-600 text-white hover:bg-blue-700"
+          <div className="flex items-center gap-3">
+            <Wifi
+              className={`w-5 h-5 ${isSimulating ? "text-brand-accent-teal animate-pulse" : "text-text-on-dark-soft"}`}
+            />
+            <button
+              onClick={onClose}
+              className="text-text-on-dark-soft hover:text-white transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+
+        <div className="mb-6">
+          {currentMetrics && isSimulating ? (
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-surface-dark p-4 rounded-2xl border border-surface-hairline/10">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-text-on-dark-soft block mb-1">
+                  Voltage
+                </span>
+                <span className="font-mono text-lg font-medium text-white">
+                  {currentMetrics.voltage}{" "}
+                  <span className="text-sm text-text-on-dark-soft">V</span>
+                </span>
+              </div>
+              <div className="bg-surface-dark p-4 rounded-2xl border border-surface-hairline/10">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-text-on-dark-soft block mb-1">
+                  Current
+                </span>
+                <span className="font-mono text-lg font-medium text-white">
+                  {currentMetrics.current}{" "}
+                  <span className="text-sm text-text-on-dark-soft">A</span>
+                </span>
+              </div>
+              <div className="bg-surface-dark p-4 rounded-2xl border border-surface-hairline/10">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-text-on-dark-soft block mb-1">
+                  Power
+                </span>
+                <span className="font-mono text-lg font-medium text-white">
+                  {currentMetrics.power}{" "}
+                  <span className="text-sm text-text-on-dark-soft">W</span>
+                </span>
+              </div>
+              <div
+                className={`p-4 rounded-2xl border ${currentMetrics.anomaly ? "bg-brand-primary/20 border-brand-primary/50" : "bg-surface-dark border-surface-hairline/10"}`}
+              >
+                <span
+                  className={`text-[10px] font-bold uppercase tracking-widest block mb-1 ${currentMetrics.anomaly ? "text-brand-primary" : "text-text-on-dark-soft"}`}
+                >
+                  CO₂e (est)
+                </span>
+                <span
+                  className={`font-mono text-lg font-medium ${currentMetrics.anomaly ? "text-brand-primary" : "text-white"}`}
+                >
+                  {currentMetrics.co2e}{" "}
+                  <span className="text-sm opacity-50">kg</span>
+                </span>
+              </div>
+            </div>
+          ) : (
+            <div className="text-sm text-text-on-dark-soft p-6 bg-surface-dark border border-surface-hairline/10 rounded-2xl text-center">
+              System standby. Activate to transmit real-time telemetry.
+            </div>
+          )}
+        </div>
+
+        <button
+          className={`w-full py-4 rounded-xl flex items-center justify-center text-sm font-bold tracking-wide transition-colors ${
+            isSimulating
+              ? "bg-surface-dark border border-brand-primary/30 text-brand-primary hover:bg-brand-primary/10"
+              : "bg-brand-primary text-text-on-dark hover:bg-brand-primary-active"
           }`}
-          onClick={() => setIsSimulating(!isSimulating)}
+          onClick={() => toggleSimulation(device.id)}
         >
           {isSimulating ? (
-            <><StopCircle className="w-4 h-4 mr-2" /> Stop Simulation</>
+            <>
+              <StopCircle className="w-5 h-5 mr-2" /> Suspend Telemetry
+            </>
           ) : (
-            <><Power className="w-4 h-4 mr-2" /> Start Digital Twin</>
+            <>
+              <Power className="w-5 h-5 mr-2" /> Initialize Digital Twin
+            </>
           )}
         </button>
       </div>

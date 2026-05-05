@@ -23,8 +23,6 @@ export default function RegisterPage() {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       await updateProfile(userCredential.user, { displayName: name });
-      
-      // Save user to firestore
       await setDoc(doc(db, "users", userCredential.user.uid), {
         name,
         email,

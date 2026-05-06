@@ -45,7 +45,7 @@ export default function Home() {
   };
 
   return (
-    <div className="p-8 grid grid-cols-12 gap-6 max-w-6xl mx-auto">
+    <div className="p-4 md:p-8 grid grid-cols-12 gap-6 max-w-6xl mx-auto">
       <ForecastingChart />
 
       <section className="col-span-12 md:col-span-4 bg-surface-card border border-surface-hairline rounded-2xl p-6 flex flex-col">

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Calendar, Bell, Download, ChevronDown, X } from "lucide-react";
+import { Calendar, Bell, Download, ChevronDown, X, Menu } from "lucide-react";
 import { useAuth } from "./AuthProvider";
 import { useSimulator } from "./SimulatorProvider";
 import { ActivityItem } from "@/components/molecules/ActivityItem";
@@ -10,7 +10,11 @@ import {
   type ActivityEntry,
 } from "@/lib/activityLog";
 
-export function TopBar() {
+interface TopBarProps {
+  onMenuToggle?: () => void;
+}
+
+export function TopBar({ onMenuToggle }: TopBarProps) {
   const { user } = useAuth();
   const { isAnySimulationActive, activeSimulations, aggregatedStats } = useSimulator();
   const [isAlertsOpen, setIsAlertsOpen] = useState(false);
@@ -90,22 +94,33 @@ export function TopBar() {
   };
 
   return (
-    <header className="h-20 flex-shrink-0 bg-surface-canvas border-b border-surface-hairline flex items-center justify-between px-8 py-4 font-sans z-10 sticky top-0 relative">
-      <div>
-        <h1 className="text-xl font-serif italic text-text-ink">
-          Ekosistem Startup Jakarta
-          <span className="text-text-muted-soft not-italic text-sm ml-2 font-sans font-normal">/ Kantor Pusat</span>
-        </h1>
-        {isAnySimulationActive && (
-          <div className="flex items-center gap-2 mt-0.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-brand-accent-teal animate-pulse"></span>
-            <span className="text-[10px] uppercase font-bold tracking-widest text-brand-accent-teal">
-              {activeSimulations.length} Perangkat Aktif · {(aggregatedStats.totalPower / 1000).toFixed(2)} kW
-            </span>
-          </div>
-        )}
+    <header className="h-14 md:h-20 flex-shrink-0 bg-surface-canvas border-b border-surface-hairline flex items-center justify-between px-4 md:px-8 py-3 md:py-4 font-sans z-10 sticky top-0 relative">
+      <div className="flex items-center gap-3 min-w-0">
+        {/* Hamburger — mobile only */}
+        <button
+          onClick={onMenuToggle}
+          className="md:hidden p-1.5 rounded-xl hover:bg-surface-soft transition-colors flex-shrink-0"
+        >
+          <Menu className="w-5 h-5 text-text-ink" />
+        </button>
+
+        <div className="min-w-0">
+          <h1 className="text-base md:text-xl font-serif italic text-text-ink truncate">
+            Ekosistem Startup Jakarta
+            <span className="text-text-muted-soft not-italic text-sm ml-2 font-sans font-normal hidden sm:inline">/ Kantor Pusat</span>
+          </h1>
+          {isAnySimulationActive && (
+            <div className="flex items-center gap-2 mt-0.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-brand-accent-teal animate-pulse"></span>
+              <span className="text-[10px] uppercase font-bold tracking-widest text-brand-accent-teal">
+                {activeSimulations.length} Aktif · {(aggregatedStats.totalPower / 1000).toFixed(2)} kW
+              </span>
+            </div>
+          )}
+        </div>
       </div>
-      <div className="flex items-center gap-4">
+
+      <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
         <div className="relative" ref={dateRef}>
           <button
             onClick={() => setIsDateOpen(!isDateOpen)}
@@ -188,7 +203,7 @@ export function TopBar() {
           </button>
           
           {isAlertsOpen && (
-            <div className="absolute right-0 top-12 w-96 bg-surface-card border border-surface-hairline rounded-2xl overflow-hidden z-50">
+            <div className="fixed inset-x-4 top-16 md:absolute md:inset-x-auto md:right-0 md:top-12 md:w-96 bg-surface-card border border-surface-hairline rounded-2xl overflow-hidden z-50">
               <div className="flex justify-between items-center p-4 border-b border-surface-hairline bg-surface-soft">
                 <span className="text-[11px] font-bold uppercase tracking-widest text-text-muted">
                   Riwayat Aktivitas
@@ -244,7 +259,7 @@ export function TopBar() {
           )}
         </div>
 
-        <button className="px-5 py-2.5 bg-text-ink hover:bg-brand-primary text-text-on-dark rounded-2xl text-xs font-bold tracking-wide transition-colors flex items-center gap-2">
+        <button className="hidden sm:flex px-5 py-2.5 bg-text-ink hover:bg-brand-primary text-text-on-dark rounded-2xl text-xs font-bold tracking-wide transition-colors items-center gap-2">
           <Download className="w-4 h-4" />
           <span className="hidden sm:inline">EKSPOR</span>
         </button>

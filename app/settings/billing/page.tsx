@@ -106,13 +106,13 @@ export default function BillingSettingsPage() {
 
   if (loading)
     return (
-      <div className="p-8 max-w-3xl mx-auto flex justify-center">
+      <div className="p-4 md:p-8 max-w-3xl mx-auto flex justify-center">
         <Loader2 className="w-6 h-6 animate-spin text-brand-primary" />
       </div>
     );
 
   return (
-    <div className="p-8 max-w-3xl mx-auto space-y-8">
+    <div className="p-4 md:p-8 max-w-3xl mx-auto space-y-8">
       <div>
         <h1 className="text-2xl font-serif font-bold italic text-text-ink mb-1">
           Konfigurasi Tarif & Baseline

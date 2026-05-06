@@ -9,7 +9,11 @@ import { useAuth } from "./AuthProvider";
 import { useSimulator } from "./SimulatorProvider";
 import { logActivity } from "@/lib/activityLog";
 
-export function Sidebar() {
+interface SidebarProps {
+  onNavigate?: () => void;
+}
+
+export function Sidebar({ onNavigate }: SidebarProps) {
   const pathname = usePathname();
   const { user } = useAuth();
   const { isAnySimulationActive, activeSimulations, aggregatedStats, anomalyCount } = useSimulator();
@@ -35,8 +39,12 @@ export function Sidebar() {
     ? Math.max(85, 100 - anomalyCount * 0.5 - (aggregatedStats.totalPower > 5000 ? 2 : 0)).toFixed(1)
     : "97.5";
 
+  const handleClick = () => {
+    onNavigate?.();
+  };
+
   return (
-    <aside className="w-64 border-r border-surface-hairline flex flex-col p-6 bg-surface-canvas font-sans sticky top-0 h-screen">
+    <aside className="w-64 border-r border-surface-hairline flex flex-col p-6 bg-surface-canvas font-sans h-screen overflow-y-auto">
       <div className="mb-10">
         <div className="text-2xl font-serif font-bold italic tracking-tighter text-brand-primary">EcoMeter</div>
         <div className="text-[10px] uppercase tracking-widest text-text-muted mt-1">B2B Energy SaaS</div>
@@ -45,34 +53,34 @@ export function Sidebar() {
       <nav className="space-y-2 flex-1">
         <div className="text-[11px] font-bold uppercase tracking-widest text-text-muted-soft mb-4">Dashboard</div>
         
-        <Link href="/" className={getLinkClasses("/")}>
+        <Link href="/" className={getLinkClasses("/")} onClick={handleClick}>
           <LayoutDashboard className="w-4 h-4 ml-0.5" />
           <span>Ringkasan</span>
         </Link>
-        <Link href="/analytics" className={getLinkClasses("/analytics")}>
+        <Link href="/analytics" className={getLinkClasses("/analytics")} onClick={handleClick}>
           <Activity className="w-4 h-4 ml-0.5" />
           <span>Analitik & AI</span>
         </Link>
-        <Link href="/groups" className={getLinkClasses("/groups")}>
+        <Link href="/groups" className={getLinkClasses("/groups")} onClick={handleClick}>
           <Box className="w-4 h-4 ml-0.5" />
           <span>Grup Virtual</span>
         </Link>
-        <Link href="/reports" className={getLinkClasses("/reports")}>
+        <Link href="/reports" className={getLinkClasses("/reports")} onClick={handleClick}>
           <FileText className="w-4 h-4 ml-0.5" />
           <span>Audit SRUK</span>
         </Link>
-        <Link href="/leaderboard" className={getLinkClasses("/leaderboard")}>
+        <Link href="/leaderboard" className={getLinkClasses("/leaderboard")} onClick={handleClick}>
           <Trophy className="w-4 h-4 ml-0.5" />
           <span>Papan Peringkat</span>
         </Link>
-        <Link href="/integrations" className={getLinkClasses("/integrations")}>
+        <Link href="/integrations" className={getLinkClasses("/integrations")} onClick={handleClick}>
           <Plug className="w-4 h-4 ml-0.5" />
           <span>Integrasi ERP</span>
         </Link>
 
         <div className="mt-8 mb-4">
           <div className="text-[11px] font-bold uppercase tracking-widest text-text-muted-soft mb-4">Sistem</div>
-          <Link href="/devices" className={getLinkClasses("/devices")}>
+          <Link href="/devices" className={getLinkClasses("/devices")} onClick={handleClick}>
             <Router className="w-4 h-4 ml-0.5" />
             <span className="flex items-center gap-2">
               Perangkat IoT
@@ -81,7 +89,7 @@ export function Sidebar() {
               )}
             </span>
           </Link>
-          <Link href="/settings/billing" className={getLinkClasses("/settings/billing")}>
+          <Link href="/settings/billing" className={getLinkClasses("/settings/billing")} onClick={handleClick}>
             <Settings className="w-4 h-4 ml-0.5" />
             <span>Pengaturan</span>
           </Link>

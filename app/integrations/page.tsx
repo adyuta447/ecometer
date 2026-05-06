@@ -23,7 +23,7 @@ export default function IntegrationsPage() {
   };
 
   return (
-    <div className="p-8 max-w-6xl mx-auto space-y-8">
+    <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-8">
       <div>
         <h1 className="text-2xl font-serif font-bold italic text-text-ink mb-1">Integrasi ERP & Akuntansi</h1>
         <p className="text-sm text-text-muted">Hubungkan data utilitas real-time langsung ke software pembukuan kamu via Open API.</p>

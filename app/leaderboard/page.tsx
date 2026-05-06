@@ -3,7 +3,7 @@ import { Trophy, Share2, Globe, Sparkles } from "lucide-react";
 
 export default function LeaderboardPage() {
   return (
-    <div className="p-8 max-w-6xl mx-auto space-y-6">
+    <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-serif font-bold italic text-text-ink mb-1">

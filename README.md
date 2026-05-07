@@ -2,6 +2,9 @@
 
 Ecometer adalah platform dashboard analitik dan manajemen efisiensi energi cerdas untuk melacak penggunaan daya utilitas secara real-time, mendeteksi anomali, melakukan simulasi "What-If" untuk proyeksi tagihan, dan melihat jejak emisi karbon (CO₂e).
 
+
+## Link Demo: ecometer-blush.vercel.app
+
 ## 🌟 Fitur Utama
 
 - **Manajemen Perangkat (Devices):** Pantau status hidup/mati, daya (Watt), dan riwayat operasi berbagai perangkat IoT pintar.

@@ -45,7 +45,7 @@ Ecometer adalah platform dashboard analitik dan manajemen efisiensi energi cerda
 
 1. **Authentication:** Pengguna melakukan login melalui portal EcoMeter yang aman.
 2. **Monitoring:** Mengakses dasbor analitik untuk melihat visualisasi penggunaan daya dan jejak emisi karbon kapan saja.
-3. **Alerting:** Menerima notifikasi alarm ke ponsel apabila terdeteksi anomali konsumsi energi di luar jam operasional normal.
+3. **Alerting:** Menerima notifikasi alarm ke  apabila terdeteksi anomali konsumsi energi di luar jam operasional normal.
 4. **Reporting:** Mengunduh laporan jejak audit emisi yang transparan untuk kebutuhan pelaporan ESG atau SRUK 2026 dalam satu klik.
 5. **Optimization:** Menggunakan wawasan preskriptif untuk memangkas inefisiensi operasional dan meningkatkan profitabilitas perusahaan.
 

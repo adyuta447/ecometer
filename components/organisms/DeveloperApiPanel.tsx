@@ -17,7 +17,9 @@ export function DeveloperApiPanel({
       <div className="flex-1">
         <div className="flex items-center gap-2 mb-4">
           <Layers className="w-5 h-5 text-brand-primary" />
-          <h2 className="text-xl font-serif italic">Akses Developer REST API</h2>
+          <h2 className="text-xl font-serif italic">
+            Akses Developer REST API
+          </h2>
         </div>
         <p className="text-sm text-text-on-dark-soft mb-6 leading-relaxed">
           Butuh integrasi kustom? Kami sediakan Open API buat baca data sensor

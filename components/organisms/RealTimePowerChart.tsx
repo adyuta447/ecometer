@@ -1,8 +1,20 @@
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 import { Zap } from "lucide-react";
-import StatusBadge from "@/components/atoms/StatusBadge";
+import { StatusBadge } from "@/components/atoms/StatusBadge";
 
-export function RealTimePowerChart({ powerChartData }: { powerChartData: any[] }) {
+export function RealTimePowerChart({
+  powerChartData,
+}: {
+  powerChartData: any[];
+}) {
   if (powerChartData.length <= 3) return null;
 
   return (
@@ -23,13 +35,7 @@ export function RealTimePowerChart({ powerChartData }: { powerChartData: any[] }
             margin={{ top: 5, right: 5, left: -20, bottom: 0 }}
           >
             <defs>
-              <linearGradient
-                id="powerGradient"
-                x1="0"
-                y1="0"
-                x2="0"
-                y2="1"
-              >
+              <linearGradient id="powerGradient" x1="0" y1="0" x2="0" y2="1">
                 <stop
                   offset="5%"
                   stopColor="var(--color-brand-accent-teal)"

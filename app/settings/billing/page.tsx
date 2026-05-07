@@ -1,108 +1,27 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
-import { DollarSign, Save, Loader2, Info, Calculator } from "lucide-react";
-import {
-  collection,
-  query,
-  where,
-  getDocs,
-  doc,
-  setDoc,
-  addDoc,
-} from "firebase/firestore";
-import { db } from "@/lib/firebase";
-import { useAuth } from "@/components/AuthProvider";
-import { useNotification } from "@/components/NotificationProvider";
-import { logActivity } from "@/lib/activityLog";
+import { DollarSign, Save, Loader2 } from "lucide-react";
+import { useBillingSettings } from "@/hooks/useBillingSettings";
+import { SimulationSection } from "@/components/organisms/SimulationSection";
 
 export default function BillingSettingsPage() {
-  const { user } = useAuth();
-  const { addNotification } = useNotification();
-  const [tariff, setTariff] = useState("1444.70");
-  const [budget, setBudget] = useState("45000000");
-  const [co2Factor, setCo2Factor] = useState("0.87");
-  const [isSaving, setIsSaving] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [settingId, setSettingId] = useState<string | null>(null);
-
-  useEffect(() => {
-    async function fetchSettings() {
-      if (!user) return;
-      try {
-        const q = query(
-          collection(db, "settings"),
-          where("userId", "==", user.uid),
-        );
-        const qs = await getDocs(q);
-        if (!qs.empty) {
-          const docData = qs.docs[0];
-          const data = docData.data();
-          setSettingId(docData.id);
-          if (data.tariff) setTariff(data.tariff);
-          if (data.budget) setBudget(data.budget);
-          if (data.co2Factor) setCo2Factor(data.co2Factor);
-        }
-      } catch (error) {
-        console.error("Error fetching settings:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchSettings();
-  }, [user]);
-
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user) return;
-    setIsSaving(true);
-    try {
-      if (settingId) {
-        await setDoc(
-          doc(db, "settings", settingId),
-          {
-            tariff,
-            budget,
-            co2Factor,
-            userId: user.uid,
-            updatedAt: new Date().toISOString(),
-          },
-          { merge: true },
-        );
-      } else {
-        const docRef = await addDoc(collection(db, "settings"), {
-          tariff,
-          budget,
-          co2Factor,
-          userId: user.uid,
-          updatedAt: new Date().toISOString(),
-        });
-        setSettingId(docRef.id);
-      }
-      await logActivity(user.uid, "settings_changed", `Pengaturan tarif diperbarui: Rp ${tariff}/kWh, Anggaran Rp ${Number(budget).toLocaleString("id-ID")}`, "info", {
-        tariff,
-        budget,
-        co2Factor,
-      });
-      addNotification("Konfigurasi tarif baseline berhasil disimpan.", "success");
-    } catch (error: any) {
-      addNotification(error.message || "Gagal menyimpan pengaturan.", "error");
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  // Perhitungan live berdasarkan input user
-  const tariffNum = Number(tariff) || 0;
-  const budgetNum = Number(budget) || 0;
-  const co2Num = Number(co2Factor) || 0;
-
-  // Estimasi kWh yang bisa dipakai dari budget
-  const estimatedKwh = tariffNum > 0 ? budgetNum / tariffNum : 0;
-  // Estimasi emisi dari kWh tersebut
-  const estimatedEmissions = (estimatedKwh * co2Num) / 1000;
-  // Estimasi biaya per hari (30 hari)
-  const dailyCost = budgetNum / 30;
+  const {
+    tariff,
+    setTariff,
+    budget,
+    setBudget,
+    co2Factor,
+    setCo2Factor,
+    loading,
+    isSaving,
+    handleSave,
+    tariffNum,
+    budgetNum,
+    co2Num,
+    estimatedKwh,
+    estimatedEmissions,
+    dailyCost,
+  } = useBillingSettings();
 
   if (loading)
     return (
@@ -183,73 +102,14 @@ export default function BillingSettingsPage() {
             </div>
           </div>
 
-          {/* Informasi Perhitungan — tanpa emoji, tanpa gradient */}
-          <div className="p-5 bg-surface-canvas rounded-2xl border border-surface-hairline space-y-4">
-            <h3 className="font-bold text-text-ink text-sm uppercase tracking-tight flex items-center gap-2 border-b border-surface-hairline pb-4">
-              <Calculator className="w-4 h-4 text-brand-accent-teal" /> Simulasi Perhitungan
-            </h3>
-
-            <p className="text-xs text-text-muted leading-relaxed">
-              Berdasarkan parameter yang kamu isi di atas, berikut estimasi perhitungan yang dipakai dashboard untuk proyeksi dan laporan audit.
-            </p>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
-              <div className="p-4 bg-surface-soft rounded-xl border border-surface-hairline">
-                <div className="text-[10px] uppercase font-bold text-text-muted-soft tracking-widest mb-1">
-                  Estimasi Pemakaian Maksimal
-                </div>
-                <div className="text-lg font-serif font-bold text-text-ink">
-                  {estimatedKwh.toLocaleString("id-ID", { maximumFractionDigits: 0 })} kWh
-                </div>
-                <p className="text-[10px] text-text-muted-soft mt-1">
-                  Rumus: Anggaran / Tarif = Rp {budgetNum.toLocaleString("id-ID")} / Rp {tariffNum.toLocaleString("id-ID")}
-                </p>
-              </div>
-
-              <div className="p-4 bg-surface-soft rounded-xl border border-surface-hairline">
-                <div className="text-[10px] uppercase font-bold text-text-muted-soft tracking-widest mb-1">
-                  Estimasi Emisi Bulanan
-                </div>
-                <div className="text-lg font-serif font-bold text-text-ink">
-                  {estimatedEmissions.toFixed(1)} ton CO₂e
-                </div>
-                <p className="text-[10px] text-text-muted-soft mt-1">
-                  Rumus: kWh x Faktor CO₂e = {estimatedKwh.toLocaleString("id-ID", { maximumFractionDigits: 0 })} x {co2Num}
-                </p>
-              </div>
-
-              <div className="p-4 bg-surface-soft rounded-xl border border-surface-hairline">
-                <div className="text-[10px] uppercase font-bold text-text-muted-soft tracking-widest mb-1">
-                  Biaya Harian Rata-rata
-                </div>
-                <div className="text-lg font-serif font-bold text-text-ink">
-                  Rp {dailyCost.toLocaleString("id-ID", { maximumFractionDigits: 0 })}
-                </div>
-                <p className="text-[10px] text-text-muted-soft mt-1">
-                  Rumus: Anggaran / 30 hari
-                </p>
-              </div>
-
-              <div className="p-4 bg-surface-soft rounded-xl border border-surface-hairline">
-                <div className="text-[10px] uppercase font-bold text-text-muted-soft tracking-widest mb-1">
-                  Biaya per Ton CO₂e
-                </div>
-                <div className="text-lg font-serif font-bold text-text-ink">
-                  Rp {estimatedEmissions > 0 ? (budgetNum / estimatedEmissions).toLocaleString("id-ID", { maximumFractionDigits: 0 }) : "0"}
-                </div>
-                <p className="text-[10px] text-text-muted-soft mt-1">
-                  Rumus: Anggaran / Estimasi Emisi
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-2 p-3 bg-surface-soft rounded-xl border border-surface-hairline mt-2">
-              <Info className="w-4 h-4 text-brand-primary flex-shrink-0 mt-0.5" />
-              <p className="text-xs text-text-muted leading-relaxed">
-                Angka di atas bersifat estimasi berdasarkan konfigurasi. Perhitungan aktual akan mempertimbangkan pola penggunaan perangkat IoT, anomali terdeteksi, dan penyesuaian prediksi AI/ML secara real-time.
-              </p>
-            </div>
-          </div>
+          <SimulationSection
+            tariffNum={tariffNum}
+            budgetNum={budgetNum}
+            co2Num={co2Num}
+            estimatedKwh={estimatedKwh}
+            estimatedEmissions={estimatedEmissions}
+            dailyCost={dailyCost}
+          />
 
           <button
             type="submit"

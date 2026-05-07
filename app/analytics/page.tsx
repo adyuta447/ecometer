@@ -1,9 +1,8 @@
 "use client";
 
 import { useAnalytics } from "@/hooks/useAnalytics";
-import { BrainCircuit, LineChart as LineChartIcon } from "lucide-react";
-import SectionLabel from "@/components/atoms/SectionLabel";
-import StatCard from "@/components/atoms/StatCard";
+import { Loader2 } from "lucide-react";
+import { StatusBadge } from "@/components/atoms/StatusBadge";
 import { BillProjectionChart } from "@/components/organisms/BillProjectionChart";
 import { WhatIfSimulationPanel } from "@/components/organisms/WhatIfSimulationPanel";
 import { RealTimePowerChart } from "@/components/organisms/RealTimePowerChart";
@@ -31,49 +30,30 @@ export default function AnalyticsPage() {
 
   if (loading) {
     return (
-      <div className="flex h-full items-center justify-center text-text-muted-soft">
-        <p className="animate-pulse">Loading engine AI...</p>
+      <div className="p-4 md:p-8 max-w-6xl mx-auto flex justify-center">
+        <Loader2 className="w-6 h-6 animate-spin text-brand-primary" />
       </div>
     );
   }
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
-      <SectionLabel icon={<BrainCircuit />} text="Kecerdasan Buatan" />
-
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <StatCard
-          title="Baseline Konsumsi"
-          value={`${baseLineTotalKWh.toLocaleString()} kWh`}
-          subValue="Prediksi awal tanpa efisiensi"
-          icon={<LineChartIcon />}
-        />
-        <StatCard
-          title="Proyeksi Baru"
-          value={`${currentTotalKWh.toLocaleString(undefined, { maximumFractionDigits: 0 })} kWh`}
-          subValue={
-            efficiencyCut > 0
-              ? `Dengan potongan ${efficiencyCut}%`
-              : "Tanpa potongan efisiensi"
-          }
-          icon={<BrainCircuit />}
-          trend={
-            efficiencyCut > 0
-              ? { value: efficiencyCut, label: "Lebih Efisien", isPositive: true }
-              : undefined
-          }
-        />
-        <StatCard
-          title="Tingkat Akurasi"
-          value={`${computedMape.toFixed(2)}%`}
-          subValue={`MAPE (Mean Abs. Percentage Error)`}
-        />
-        <StatCard
-          title="Status Pembaruan Model"
-          value="Siap"
-          subValue={`Dilatih ualng: ${lastTrainedAgo}`}
-          trend={isAnySimulationActive ? { value: 0, label: "Live Data Feed", isPositive: true } : undefined}
-        />
+    <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-serif font-bold italic text-text-ink mb-1">
+            Analitik Prediktif
+          </h1>
+          <p className="text-sm text-text-muted">
+            Prediksi AI/ML dan deteksi anomali otomatis
+          </p>
+        </div>
+        {isAnySimulationActive && (
+          <StatusBadge
+            label={`${activeSimulations.length} Perangkat Streaming`}
+            variant="teal"
+            pulse
+          />
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -86,7 +66,7 @@ export default function AnalyticsPage() {
           aggregatedStats={aggregatedStats}
           chartData={chartData}
         />
-        
+
         <WhatIfSimulationPanel
           isAnySimulationActive={isAnySimulationActive}
           activeSimulationsCount={activeSimulations.length}

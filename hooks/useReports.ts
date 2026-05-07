@@ -9,8 +9,14 @@ import { useNotification } from "@/components/NotificationProvider";
 export function useReports() {
   const { user } = useAuth();
   const { addNotification } = useNotification();
-  const { isAnySimulationActive, aggregatedStats, activeSimulations, metricsHistory, anomalyCount } = useSimulator();
-  
+  const {
+    isAnySimulationActive,
+    aggregatedStats,
+    activeSimulations,
+    metricsHistory,
+    anomalyCount,
+  } = useSimulator();
+
   const [isExporting, setIsExporting] = useState(false);
   const [co2Factor, setCo2Factor] = useState(0.87);
   const [loading, setLoading] = useState(true);
@@ -19,7 +25,10 @@ export function useReports() {
     async function fetchSettings() {
       if (!user) return;
       try {
-        const q = query(collection(db, "settings"), where("userId", "==", user.uid));
+        const q = query(
+          collection(db, "settings"),
+          where("userId", "==", user.uid),
+        );
         const qs = await getDocs(q);
         if (!qs.empty) {
           const s = qs.docs[0].data();
@@ -49,10 +58,16 @@ export function useReports() {
   const handleExport = async () => {
     setIsExporting(true);
     if (user) {
-      await logActivity(user.uid, "export_report", "Laporan audit SRUK diekspor", "success", {
-        totalEnergyMwh: totalEnergyMwh.toFixed(1),
-        totalEmissions,
-      });
+      await logActivity(
+        user.uid,
+        "export_report",
+        "Laporan audit SRUK diekspor",
+        "success",
+        {
+          totalEnergyMwh: totalEnergyMwh.toFixed(1),
+          totalEmissions,
+        },
+      );
     }
     setTimeout(() => {
       setIsExporting(false);
@@ -74,6 +89,6 @@ export function useReports() {
     metricsHistory,
     anomalyCount,
     calculateEmissions,
-    handleExport
+    handleExport,
   };
 }

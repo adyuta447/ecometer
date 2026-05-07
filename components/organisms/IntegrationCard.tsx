@@ -24,9 +24,7 @@ export function IntegrationCard({
       }`}
     >
       <div className="flex justify-between items-start mb-6">
-        <div className="w-12 h-12 flex items-center justify-center">
-          {logo}
-        </div>
+        <div className="w-12 h-12 flex items-center justify-center">{logo}</div>
         {isActive && (
           <span className="flex items-center gap-1.5 px-2.5 py-1 bg-brand-accent-teal/10 text-brand-accent-teal text-[10px] font-bold uppercase tracking-widest rounded-md">
             <div className="w-1.5 h-1.5 rounded-full bg-brand-accent-teal animate-pulse"></div>{" "}
@@ -39,7 +37,9 @@ export function IntegrationCard({
       <div className="flex items-center justify-between text-xs pt-4 border-t border-surface-hairline mt-auto">
         {isActive ? (
           <>
-            <span className="text-text-muted-soft">Sync terakhir: {lastSync}</span>
+            <span className="text-text-muted-soft">
+              Sync terakhir: {lastSync}
+            </span>
             <button className="text-text-ink font-medium hover:text-brand-primary transition-colors">
               Konfigurasi
             </button>
